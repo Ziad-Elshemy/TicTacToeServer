@@ -1,0 +1,5 @@
+/TicTacToeServer/dist/*
+/TicTacToeServer/build/*
+/TicTacToeServer/nbproject/private/*
+/TicTacToeServer/build.xml
+/TicTacToeServer/manifest.mf
