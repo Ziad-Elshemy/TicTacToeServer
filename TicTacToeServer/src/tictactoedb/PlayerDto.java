@@ -13,7 +13,7 @@ public class PlayerDto {
     
     private String userName;
     private String name;
-    private String Password;
+    private String password;
     private boolean isOnline;
     private boolean isPlaying;
     private int score;
@@ -35,14 +35,14 @@ public class PlayerDto {
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public void setPassword(String Password) {
-        this.Password = Password;
+        this.password = Password;
     }
 
-    public boolean isIsOnline() {
+    public boolean getIsOnline() {
         return isOnline;
     }
 
@@ -50,7 +50,7 @@ public class PlayerDto {
         this.isOnline = isOnline;
     }
 
-    public boolean isIsPlaying() {
+    public boolean getIsPlaying() {
         return isPlaying;
     }
 

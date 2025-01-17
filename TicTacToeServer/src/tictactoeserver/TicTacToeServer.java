@@ -22,9 +22,7 @@ public class TicTacToeServer extends Application {
     public void start(Stage stage) throws Exception {
         //Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         Parent root = new FXMLServerBase();
-        DatabaseDao dp = new DatabaseDao();
         Scene scene = new Scene(root);
-        
         stage.setScene(scene);
         stage.show();
     }
