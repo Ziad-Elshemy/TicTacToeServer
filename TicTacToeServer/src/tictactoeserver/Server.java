@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tictactoedb.DatabaseDao;
 
 /**
  *
@@ -18,6 +19,8 @@ import java.util.logging.Logger;
 public class Server extends Thread {
     ServerSocket serverSocket;
     ServerController serverController;
+    //DatabaseDao myDatabase = new DatabaseDao();
+    static int counter = 0;
     
     public Server(){
     
@@ -34,6 +37,7 @@ public class Server extends Thread {
     public void stopServer(){
         try {
             serverSocket.close();
+            // you need to close all connections if you have players in the playersrList.
             stop();
             System.out.println("server is offline");
         } catch (IOException ex) {
@@ -46,11 +50,28 @@ public class Server extends Thread {
     public void run() {
         while (true) {            
             try {
-                Socket socket;
-                socket = serverSocket.accept();
-                serverController = new ServerController(socket);
-            } catch (IOException ex) {
+                Socket playerSocket;
+                playerSocket = serverSocket.accept();
+                serverController = new ServerController(playerSocket);
                 System.out.println("new player added");
+                
+                /*
+                String str = serverController.dis.readLine();
+                counter++;
+                String msg = "";
+                for(ServerController player : ServerController.playersList){
+                    msg = ""+str+counter;
+                    player.ps.println(msg);
+                }
+                if(msg.equals("Player No.5")){
+                    myDatabase.register();
+                }
+                */
+                
+                
+                
+            } catch (IOException ex) {
+                System.out.println("can not add player!");
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
