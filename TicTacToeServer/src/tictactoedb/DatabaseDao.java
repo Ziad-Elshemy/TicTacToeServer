@@ -24,8 +24,6 @@ public interface DatabaseDao {
     
     public int register(String json);
     public int editProfile(String gsonrequest);
-    
-    
     public int selectInfoForEdidProfilePage(String usename);
     
     

@@ -64,7 +64,7 @@ public class ServerController {
                             if(code == Codes.REGESTER_CODE){
                                 String jsonPlayerData = (String)requestData.get(1);
                                 System.out.println("the Player data in server: "+jsonPlayerData);
-                                int databaseResult = myDatabase.insert(jsonPlayerData);
+                                int databaseResult = myDatabase.register(jsonPlayerData);
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
