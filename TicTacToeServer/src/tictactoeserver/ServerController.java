@@ -86,6 +86,18 @@ public class ServerController {
                                 }
                                 
                             }
+                            if(code == Codes.CHANGE_PASSWORD_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                 String jsonPlayerData = (String)requestData.get(1);
+                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
+                                 int dataDaseResult = myDatabase.editProfile(jsonPlayerData);
+                                 requestData.clear();
+                                 requestData.add(Codes.CHANGE_PASSWORD_CODE);
+                                 requestData.add(dataDaseResult);
+                                 mouth.println(requestData);
+                            }
+                            
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
                         }

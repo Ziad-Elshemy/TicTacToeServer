@@ -20,6 +20,13 @@ import org.apache.derby.jdbc.ClientDriver;
  */
 public interface DatabaseDao {
     
-    public int insert(String json);
+
+    
+    public int register(String json);
+    public int editProfile(String gsonrequest);
+    
+    
+    public int selectInfoForEdidProfilePage(String usename);
+    
     
 }

@@ -33,9 +33,14 @@ public class DatabaseDaoImpl implements DatabaseDao{
     }
 
     @Override
-    public int insert(String json) {
+    public int register(String json){
         int result = 0;
         try {
+//            PlayerDto player = new PlayerDto();
+//            
+//            player.setUserName("raed1998");
+//            player.setName("Raed");
+//            player.setPassword("raed123");
 
             PlayerDto player = gson.fromJson(json, PlayerDto.class);
             
@@ -53,9 +58,47 @@ public class DatabaseDaoImpl implements DatabaseDao{
         }
         return result;
     }
+
+    @Override
+    public int editProfile(String gsonrequest){
+        int result = 0;
+        try {
+            PlayerDto player = this.gson.fromJson(gsonrequest, PlayerDto.class);
+            //System.out.println(" IN editProfile UserNAme: "+player.getUserName()+" Password: "+player.getPassword());
+            Connection con = getConnection();
+            PreparedStatement pst = con.prepareStatement("UPDATE PLAYERS SET PASSWORD = ? WHERE USERNAME = ?");
+            pst.setString(1, player.getPassword());
+            pst.setString(2, player.getUserName());
+            result = pst.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+            result =  0;
+        }
+        return result;
+    }
+    
+    @Override
+    public int selectInfoForEdidProfilePage(String usename)
+    {
+        int result = 0 ;
+        try {
+            
+            Connection con = getConnection();
+            PreparedStatement pst = con.prepareStatement("");
+            
+            return result;
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
     
     public static Connection getConnection() throws SQLException{
         return  DriverManager.getConnection("jdbc:derby://localhost:1527/tictactoe_db", "root", "root");
     };
     
 }
+
+    
+    
