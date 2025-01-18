@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import tictactoedb.DatabaseDao;
+import tictactoedb.DatabaseDaoImpl;
 import utilities.Codes;
 
 /**
@@ -27,12 +28,13 @@ public class ServerController {
     PrintStream mouth;
     Socket playerSocket;
     static Vector<ServerController> playersList = new Vector<>();
+    static int i =1;
     Thread thread;
     String userName;
     String playSympol;
     ArrayList requestData;
     Gson gson = new Gson();
-    DatabaseDao myDatabase = new DatabaseDao();
+    DatabaseDao myDatabase = new DatabaseDaoImpl();
     
     
     public ServerController(Socket socket){
@@ -40,8 +42,16 @@ public class ServerController {
             playerSocket = socket;
             ear = new DataInputStream(socket.getInputStream());
             mouth = new PrintStream(socket.getOutputStream());
+            userName = "player"+i;
+            i++;
             playersList.add(this);
-            System.out.println("Test Controller");
+            //System.out.println("Test Controller");
+            System.out.println("==========================");
+            for(ServerController player : playersList){
+                System.out.println(""+player.userName);
+                
+            }
+            System.out.println("==========================");
             thread = new Thread(){
                 @Override
                 public void run() {
@@ -54,11 +64,26 @@ public class ServerController {
                             if(code == Codes.REGESTER_CODE){
                                 String jsonPlayerData = (String)requestData.get(1);
                                 System.out.println("the Player data in server: "+jsonPlayerData);
-                                int databaseResult = myDatabase.register(jsonPlayerData);
+                                int databaseResult = myDatabase.insert(jsonPlayerData);
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
+                                //[1,1]
                                 mouth.println(requestData);
+                                for(ServerController player : playersList){
+                                    System.out.println(""+player.userName);
+                                    System.out.println(""+player.playerSocket.getLocalPort());
+                                    if(player.userName.equals("player2")){
+                                        ArrayList test = new ArrayList();
+                                        test.add("hi player 2 this message is from "+userName);
+                                        player.mouth.println(test);
+                                    }
+                                    if(player.userName.equals("player1")){
+                                        ArrayList test = new ArrayList();
+                                        test.add(100);
+                                        player.mouth.println(test);
+                                    }
+                                }
                                 
                             }
                         } catch (IOException ex) {
