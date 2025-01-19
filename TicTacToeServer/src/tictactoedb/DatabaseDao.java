@@ -5,8 +5,10 @@
  */
 package tictactoedb;
 
+import com.google.gson.Gson;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,16 +18,13 @@ import org.apache.derby.jdbc.ClientDriver;
  *
  * @author Ziad-Elshemy
  */
-public class DatabaseDao {
+public interface DatabaseDao {
     
-    public DatabaseDao(){
-        try {
-            DriverManager.registerDriver(new ClientDriver());
-            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/tictactoe_db", "root", "root");
-            System.out.println("hello from database");
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+
+    
+    public int register(String json);
+    public int editProfile(String gsonrequest);
+    public int selectInfoForEdidProfilePage(String usename);
+    
     
 }
