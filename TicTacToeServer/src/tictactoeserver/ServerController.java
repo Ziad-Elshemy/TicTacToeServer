@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tictactoedb.DatabaseDao;
 import tictactoedb.DatabaseDaoImpl;
+import tictactoedb.PlayerDto;
 import utilities.Codes;
 
 /**
@@ -69,7 +70,7 @@ public class ServerController {
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
                                 //[1,1]
-                                mouth.println(requestData);
+                                //mouth.println(requestData);
                                 for(ServerController player : playersList){
                                     System.out.println(""+player.userName);
                                     System.out.println(""+player.playerSocket.getLocalPort());
@@ -88,13 +89,28 @@ public class ServerController {
                             }
                             if(code == Codes.CHANGE_PASSWORD_CODE)
                             {
-                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                // System.out.println("Request fronm SELECT FOR EDITPROFILE in server: "+json);
                                  String jsonPlayerData = (String)requestData.get(1);
                                  System.out.println("Edit Data in Server: "+jsonPlayerData);
                                  int dataDaseResult = myDatabase.editProfile(jsonPlayerData);
                                  requestData.clear();
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
+                                 mouth.println(requestData);
+                            }
+                            if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
+                            {
+                                 System.out.println("SERVER CONTROLLER EDITPROFILE: "+json);
+                                 String jsonPlayerData = (String)requestData.get(1);
+                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
+                                 String dataDaseResult = myDatabase.selectInfoForEdidProfilePage(jsonPlayerData);
+                                 requestData.clear();
+                                 gson.toJson(dataDaseResult);
+                                 
+                                 //System.out.println("Player in Server Contoller : "+dataDaseResult.getName()+","+dataDaseResult.getUserName()+","+dataDaseResult.getScore());
+                                 requestData.add(Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE);
+                                 requestData.add(dataDaseResult);
+                                 System.out.println("Jeson Request Data: "+requestData.getClass());
                                  mouth.println(requestData);
                             }
                             
