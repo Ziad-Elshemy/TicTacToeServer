@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import tictactoedb.Authentication;
 import tictactoedb.DatabaseDao;
 import tictactoedb.PlayerDto;
+import tictactoedb.DatabaseDaoImpl;
 import utilities.Codes;
 
 /**
@@ -26,86 +27,91 @@ import utilities.Codes;
  */
 public class ServerController {
     
-    DataInputStream ear;
-    PrintStream mouth;
-    Socket playerSocket;
-    static Vector<ServerController> playersList = new Vector<>();
-    Thread thread;
-    String userName;
-    String playSympol;
-    ArrayList requestData;
-    Gson gson = new Gson();
-    PlayerDto databaseResult;
-    PlayerDto currentPlayer;
-    String jsonPlayerData;
+    private DataInputStream dataInputStream;
+    private PrintStream outputStream;
+    private Socket playerSocket;
+    private static Vector<ServerController> playersList = new Vector<>();
+    private Thread thread;
+    private String userName;
+    private String playSympol;
+    private ArrayList requestData;
+    private Gson gson = new Gson();
+    private PlayerDto databaseResult;
+    private PlayerDto currentPlayer;
+    private String jsonPlayerData;
+    private DatabaseDao myDatabase = new DatabaseDaoImpl();
+    double operationCode;
     
     
     public ServerController(Socket socket){
+        
         try {
             playerSocket = socket;
-            ear = new DataInputStream(socket.getInputStream());
-            mouth = new PrintStream(socket.getOutputStream());
-            playersList.add(this);
-            System.out.println("Test Controller");
+            dataInputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new PrintStream(socket.getOutputStream());
+     
+        
             thread = new Thread(){
                 @Override
                 public void run() {
                     while (true) {                        
                         try {
-                            String json = ear.readLine();
+                            String json = dataInputStream.readLine();
                             System.out.println("the sendRequest data in server: "+json);
-                            requestData = gson.fromJson(json, ArrayList.class);
-                            System.out.println(requestData.get(0).getClass().getName());
+                            requestData = gson.fromJson(json, ArrayList.class);   
                             double code = (double) requestData.get(0);
                             
-                            
-                            if(code==Codes.REGESTER_CODE){  
+                            if(code == Codes.REGESTER_CODE){ 
                                 
-                            
                                 
+                                operationCode=code;
                                 jsonPlayerData = (String)requestData.get(1);
-                                System.out.println("the Player data in server: "+jsonPlayerData);
                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
                                 databaseResult = Authentication.register(currentPlayer);
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
-                                String jsonDatabaseResult = gson.toJson(databaseResult); // Serialize PlayerDto to JSON
+                                String jsonDatabaseResult = gson.toJson(databaseResult); 
                                 requestData.add(jsonDatabaseResult);
-                                mouth.println(requestData); 
+                                outputStream.println(requestData); 
+                               
                               
                             }else if(code == Codes.LOGIN_CODE){
                                 
-                            
-  
+
+                                operationCode=code;
                                 jsonPlayerData = (String)requestData.get(1);
-                                System.out.println("the Player data in server: "+jsonPlayerData);
                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
                                 databaseResult = Authentication.login(currentPlayer.getUserName(),currentPlayer.getPassword());
                                 requestData.clear();
                                 requestData.add(Codes.LOGIN_CODE);
-                                String jsonDatabaseResult = gson.toJson(databaseResult); // Serialize PlayerDto to JSON
+                                String jsonDatabaseResult = gson.toJson(databaseResult); 
                                 requestData.add(jsonDatabaseResult);
-                                mouth.println(requestData); 
-                                
-                                                              
-                                
-                                
+                                outputStream.println(requestData);
+                              
+    
+                              }else if(code == Codes.CHANGE_PASSWORD_CODE){
+                                 operationCode=code;
+                                 String jsonPlayerData = (String)requestData.get(1);
+                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
+                                 int dataDaseResult = myDatabase.editProfile(jsonPlayerData);
+                                 requestData.clear();
+                                 requestData.add(Codes.CHANGE_PASSWORD_CODE);
+                                 requestData.add(dataDaseResult);
+                                 outputStream.println(requestData);
+                            }
                             
-                    }
-                            
-                           
-                          
-                        
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
                         } catch (SQLException ex) {
-                           // Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
-                           databaseResult=null;
+                            
+                            
                             requestData.clear();
-                            requestData.add(Codes.REGESTER_CODE);
-                            String jsonDatabaseResult = gson.toJson(databaseResult); // Serialize PlayerDto to JSON
+                            requestData.add(operationCode);
+                            databaseResult=null;
+                            String jsonDatabaseResult = gson.toJson(databaseResult);
                             requestData.add(jsonDatabaseResult);
-                            mouth.println(requestData);
+                            outputStream.println(requestData);
+                            
                         }
                     }
                 }
