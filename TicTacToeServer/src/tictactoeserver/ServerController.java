@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tictactoedb.Authentication;
+import tictactoedb.NetworkAccessLayer;
 import tictactoedb.DatabaseDao;
 import tictactoedb.PlayerDto;
 import tictactoedb.DatabaseDaoImpl;
@@ -41,6 +41,9 @@ public class ServerController {
     private String jsonPlayerData;
     private DatabaseDao myDatabase = new DatabaseDaoImpl();
     double operationCode;
+    private ArrayList onlinePlayers;
+
+
     
     
     public ServerController(Socket socket){
@@ -49,6 +52,7 @@ public class ServerController {
             playerSocket = socket;
             dataInputStream = new DataInputStream(socket.getInputStream());
             outputStream = new PrintStream(socket.getOutputStream());
+            playersList.add(this);
      
         
             thread = new Thread(){
@@ -67,12 +71,20 @@ public class ServerController {
                                 operationCode=code;
                                 jsonPlayerData = (String)requestData.get(1);
                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
-                                databaseResult = Authentication.register(currentPlayer);
+                                databaseResult = NetworkAccessLayer.register(currentPlayer);
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
                                 String jsonDatabaseResult = gson.toJson(databaseResult); 
                                 requestData.add(jsonDatabaseResult);
                                 outputStream.println(requestData); 
+                                currentPlayer=databaseResult;
+                                currentPlayer.setIsOnline(true); 
+                                currentPlayer.setIsPlaying(true); 
+                                 
+                                NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                
+                                sendMessageToAllPlayers(); 
+
                                
                               
                             }else if(code == Codes.LOGIN_CODE){
@@ -81,15 +93,23 @@ public class ServerController {
                                 operationCode=code;
                                 jsonPlayerData = (String)requestData.get(1);
                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
-                                databaseResult = Authentication.login(currentPlayer.getUserName(),currentPlayer.getPassword());
+                                databaseResult = NetworkAccessLayer.login(currentPlayer.getUserName(),currentPlayer.getPassword());
                                 requestData.clear();
                                 requestData.add(Codes.LOGIN_CODE);
                                 String jsonDatabaseResult = gson.toJson(databaseResult); 
                                 requestData.add(jsonDatabaseResult);
                                 outputStream.println(requestData);
+                                currentPlayer=databaseResult;
+                                System.out.println(currentPlayer.getName());
+                                currentPlayer.setIsOnline(true); 
+                                currentPlayer.setIsPlaying(true);
+                                 
+                                NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                
+                                sendMessageToAllPlayers(); 
                               
     
-                              }else if(code == Codes.CHANGE_PASSWORD_CODE){
+                             }else if(code == Codes.CHANGE_PASSWORD_CODE){
                                  operationCode=code;
                                  String jsonPlayerData = (String)requestData.get(1);
                                  System.out.println("Edit Data in Server: "+jsonPlayerData);
@@ -98,10 +118,26 @@ public class ServerController {
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
                                  outputStream.println(requestData);
+                                 
+                             }else if(code == Codes.LOGOUT_CODE ){
+                                 
+                                 
+                                 currentPlayer.setIsOnline(false); 
+                                 
+                                 NetworkAccessLayer.logout(currentPlayer);
+                                 
+                                 playersList.remove(this);
+                                 currentPlayer.setIsOnline(false); 
+                                 currentPlayer.setIsPlaying(false);
+                                 sendMessageToAllPlayers();
+                                 break;
+                            
+                            
                             }
                             
                         } catch (IOException ex) {
-                            Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
+                            
+                           
                         } catch (SQLException ex) {
                             
                             
@@ -119,9 +155,35 @@ public class ServerController {
             };
             thread.start();
             
+            
+   
+            
         } catch (IOException ex) {
             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public void sendMessageToAllPlayers(){
+        
+        try {
+            ArrayList result=new ArrayList<>();
+            result.add(Codes.GET_ONLINE_PLAYERS); 
+            onlinePlayers=NetworkAccessLayer.getOnlinePlayers();
+            String jsonDatabaseResult = gson.toJson(onlinePlayers);
+            result.add(jsonDatabaseResult);
+            
+            for(ServerController player : playersList){
+                
+                player.outputStream.println(result);
+                
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+
+    }
+    
+
     
 }

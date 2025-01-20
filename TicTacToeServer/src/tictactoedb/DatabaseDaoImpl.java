@@ -141,6 +141,17 @@ public class DatabaseDaoImpl implements DatabaseDao{
 
     }
     
+    public static ResultSet  selectOnlineUsers() throws SQLException {
+            String queryString = "SELECT * FROM PLAYERS WHERE is_online = ?";   
+            statement = con.prepareStatement(queryString , ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+            statement.setBoolean(1, true);
+            playerResult = statement.executeQuery();
+            return playerResult;
+
+    }
+        
+    
+    
 
     
 }
