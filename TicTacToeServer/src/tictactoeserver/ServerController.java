@@ -25,7 +25,7 @@ public class ServerController {
     
     DataInputStream ear;
     PrintStream mouth;
-    Socket playerSocket;
+    public static Socket playerSocket;
     static Vector<ServerController> playersList = new Vector<>();
     Thread thread;
     String userName;
@@ -47,6 +47,7 @@ public class ServerController {
                 public void run() {
                     while (true) {                        
                         try {
+                            //read from client
                             String json = ear.readLine();
                             System.out.println("the sendRequest data in server: "+json);
                             requestData = gson.fromJson(json, ArrayList.class);
@@ -58,6 +59,8 @@ public class ServerController {
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
+                                //send the result of database query to the client
+                                System.out.println("request Data :"+requestData);
                                 mouth.println(requestData);
                                 
                             }

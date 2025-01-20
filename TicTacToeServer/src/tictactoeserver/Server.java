@@ -17,7 +17,7 @@ import tictactoedb.DatabaseDao;
  * @author Ziad-Elshemy
  */
 public class Server extends Thread {
-    ServerSocket serverSocket;
+    public static ServerSocket serverSocket;
     ServerController serverController;
     //DatabaseDao myDatabase = new DatabaseDao();
     static int counter = 0;
@@ -34,7 +34,7 @@ public class Server extends Thread {
         }
     }
     
-    public void stopServer(){
+    public  void stopServer(){
         try {
             serverSocket.close();
             // you need to close all connections if you have players in the playersrList.

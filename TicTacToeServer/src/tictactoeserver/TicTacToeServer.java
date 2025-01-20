@@ -5,6 +5,9 @@
  */
 package tictactoeserver;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,14 +22,24 @@ import tictactoedb.DatabaseDao;
 public class TicTacToeServer extends Application {
     
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception
+    {
         //Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         Parent root = new FXMLServerBase();
         DatabaseDao dp = new DatabaseDao();
         Scene scene = new Scene(root);
-        
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest((e)->{
+            try
+            {
+                Server.serverSocket.close();
+            }
+            catch (IOException ex) 
+            {
+                Logger.getLogger(TicTacToeServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     /**
