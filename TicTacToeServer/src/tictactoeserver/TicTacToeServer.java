@@ -14,6 +14,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import tictactoedb.DatabaseDao;
+import tictactoedb.DatabaseDaoImpl;
 
 /**
  *
@@ -26,7 +27,7 @@ public class TicTacToeServer extends Application {
     {
         //Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         Parent root = new FXMLServerBase();
-        DatabaseDao dp = new DatabaseDao();
+        DatabaseDao dp = new DatabaseDaoImpl();
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
