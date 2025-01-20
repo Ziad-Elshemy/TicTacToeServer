@@ -43,7 +43,8 @@ public class ServerController {
             playerSocket = socket;
             ear = new DataInputStream(socket.getInputStream());
             mouth = new PrintStream(socket.getOutputStream());
-            userName = "player"+i;
+            //userName = "player"+i;
+            userName = "ziad"+i;
             i++;
             playersList.add(this);
             //System.out.println("Test Controller");
@@ -58,10 +59,13 @@ public class ServerController {
                 public void run() {
                     while (true) {                        
                         try {
+                            
                             String json = ear.readLine();
                             System.out.println("the sendRequest data in server: "+json);
                             requestData = gson.fromJson(json, ArrayList.class);
                             double code = (double)requestData.get(0);
+                            
+                            
                             if(code == Codes.REGESTER_CODE){
                                 String jsonPlayerData = (String)requestData.get(1);
                                 System.out.println("the Player data in server: "+jsonPlayerData);
@@ -85,9 +89,10 @@ public class ServerController {
                                         player.mouth.println(test);
                                     }
                                 }
+                                mouth.println(requestData);
                                 
-                            }
-                            if(code == Codes.CHANGE_PASSWORD_CODE)
+                                
+                            }else if(code == Codes.CHANGE_PASSWORD_CODE)
                             {
                                 // System.out.println("Request fronm SELECT FOR EDITPROFILE in server: "+json);
                                  String jsonPlayerData = (String)requestData.get(1);
@@ -97,6 +102,53 @@ public class ServerController {
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
                                  mouth.println(requestData);
+                            }else if(code == Codes.SEND_INVITATION_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                 String revieverUsername = (String)requestData.get(1);
+                                 System.out.println("object of reciever player in Server: "+revieverUsername);
+                                 
+                                 PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 
+                                 System.out.println("user name of reciever player in Server: "+player_data.getUserName());
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                    if(player.userName.equals(player_data.getUserName().toString())){
+                                        requestData.clear();
+                                        requestData.add(Codes.SEND_INVITATION_CODE);
+                                        requestData.add(userName);
+                                        player.mouth.println(gson.toJson(requestData));
+                                    }
+                                }
+                                
+                            }
+                            //send accepted or rejected
+                            else if(code == Codes.INVITATION_REPLY_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                 double isAccepted = (double)requestData.get(1);
+                                 String senderData = (String)requestData.get(2);
+                                 
+                                 System.out.println("object of sender player in Server: "+senderData);
+                                 PlayerDto player_data = gson.fromJson(senderData, PlayerDto.class);
+                                 System.out.println("user name of sender player in Server: "+player_data.getUserName());
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                    
+                                    if(player.userName.equals(player_data.getUserName().toString())){
+                                        //don't forget to handle the reject you need if condition here
+                                        requestData.clear();
+                                        requestData.add(Codes.INVITATION_REPLY_CODE);
+                                        requestData.add(isAccepted);
+                                        requestData.add(userName);
+                                        player.mouth.println(gson.toJson(requestData));
+                                    }
+                                }
+                                
                             }
                             if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
                             {

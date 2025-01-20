@@ -18,7 +18,7 @@ public class Codes {
     
     
     public static int SEND_INVITATION_CODE = 7;
-    public static int RECIEVE_INVITATION_CODE = 8;
+    public static int INVITATION_REPLY_CODE = 8;
 
     
     
