@@ -99,6 +99,9 @@ public class DatabaseDaoImpl implements DatabaseDao{
             player.setScore(selectResult.getInt("SCORE"));
             playerJson = gson.toJson(player);
             System.out.println("jeson sent from DataDataBase: "+playerJson);
+            selectResult.close();
+            pst.close();
+            con.close();
         } catch (SQLException ex) {
             Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
         }
