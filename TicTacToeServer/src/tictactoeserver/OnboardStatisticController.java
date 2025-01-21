@@ -7,6 +7,7 @@ package tictactoeserver;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -63,7 +64,7 @@ public class OnboardStatisticController implements Initializable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            appendTextToArea(received_data_area,"Error: " + e.getMessage() );
+            appendTextToArea(received_data_area,"Error: " + e.getMessage() + "\n");
         } 
     }
         /**
@@ -75,5 +76,32 @@ public class OnboardStatisticController implements Initializable {
     private void appendTextToArea(TextArea textArea, String text) {
         textArea.appendText(text);
     }
+    
+    public void updatePlayerStatusChart(int online, int offline, int inGame) {
+ 
+    player_status_chart.getData().clear();
+
+    int total = online + offline + inGame;
+
+    if (total == 0) {
+        total = 1;  // Set total to 1 to avoid division by zero
+    }
+
+    // Calculate the percentage for each section
+    double onlinePercentage = (online / (double) total) * 100;
+    double offlinePercentage = (offline / (double) total) * 100;
+    double inGamePercentage = (inGame / (double) total) * 100;
+
+    // Create PieChart.Data with percentages as labels
+    PieChart.Data onlineData = new PieChart.Data(
+            String.format("Online Players %.1f%%", onlinePercentage), online);
+    PieChart.Data offlineData = new PieChart.Data(
+            String.format("Offline Players %.1f%%", offlinePercentage), offline);
+    PieChart.Data inGameData = new PieChart.Data(
+            String.format("In Game %.1f%%", inGamePercentage), inGame);
+
+    player_status_chart.setData(FXCollections.observableArrayList(onlineData, offlineData, inGameData));
+}
+
     
 }
