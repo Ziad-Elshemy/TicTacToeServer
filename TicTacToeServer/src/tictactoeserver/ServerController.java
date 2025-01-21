@@ -150,7 +150,7 @@ public class ServerController {
                                 }
                                 
                             }
-                            if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
+                            else if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
                             {
                                  System.out.println("SERVER CONTROLLER EDITPROFILE: "+json);
                                  String jsonPlayerData = (String)requestData.get(1);
