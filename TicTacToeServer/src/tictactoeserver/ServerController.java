@@ -165,6 +165,40 @@ public class ServerController {
                                  System.out.println("Jeson Request Data: "+requestData.getClass());
                                  mouth.println(requestData);
                             }
+                            else if(code == Codes.SEND_PLAY_ON_BOARD_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                String gameData = (String)requestData.get(1);
+                                 
+                                 System.out.println("object of sender game_data in Server: "+gameData);
+                                 ArrayList<String> game_data = gson.fromJson(gameData, ArrayList.class);
+                                 System.out.println("user name of enemy player in Server: "+game_data.get(0));
+                                 String enemyUsername = (String)game_data.get(0);
+                                 String enemySympol = (String)game_data.get(1);
+                                 String clicked_btn_id = (String)game_data.get(2);
+                                 System.out.println("user name of reciever player in Server: "+enemyUsername);
+                                 System.out.println("object of reciever player in Server: "+enemySympol);
+                                 
+                                 //PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 
+                                 
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                     System.out.println("players list: "+player.userName);
+                                    if(player.userName.equals(enemyUsername)){
+                                        System.out.println("test SEND_PLAY_ON_BOARD_CODE");
+                                        requestData.clear();
+                                        requestData.add(Codes.SEND_PLAY_ON_BOARD_CODE);
+                                        requestData.add(userName);
+                                        requestData.add(enemySympol);
+                                        requestData.add(clicked_btn_id);
+                                        player.mouth.println(gson.toJson(requestData));
+                                    }
+                                }
+                                
+                            }
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
