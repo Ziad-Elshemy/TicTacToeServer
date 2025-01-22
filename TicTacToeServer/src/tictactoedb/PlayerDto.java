@@ -9,8 +9,8 @@ package tictactoedb;
  *
  * @author Ziad-Elshemy
  */
-public class PlayerDto {
-    
+public class PlayerDto
+{
     private String userName;
     private String name;
     private String Password;
@@ -65,8 +65,5 @@ public class PlayerDto {
     public void setScore(int score) {
         this.score = score;
     }
-    
-    
-    
-    
+     
 }
