@@ -10,11 +10,14 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tictactoedb.NetworkAccessLayer;
 import tictactoedb.DatabaseDao;
+import tictactoedb.PlayerDto;
 import tictactoedb.DatabaseDaoImpl;
 import tictactoedb.PlayerDto;
 import utilities.Codes;
@@ -25,8 +28,8 @@ import utilities.Codes;
  */
 public class ServerController {
     
-    DataInputStream ear;
-    PrintStream mouth;
+    private DataInputStream dataInputStream;
+    private PrintStream outputStream;
     Socket playerSocket;
     static Vector<ServerController> playersList = new Vector<>();
     static int i =1;
@@ -36,15 +39,20 @@ public class ServerController {
     ArrayList requestData;
     Gson gson = new Gson();
     DatabaseDao myDatabase = new DatabaseDaoImpl();
+    private PlayerDto databaseResult;
+    private PlayerDto currentPlayer;
+    private String jsonPlayerData;
+    double operationCode;
+    private ArrayList onlinePlayers;
     
     
     public ServerController(Socket socket){
         try {
             playerSocket = socket;
-            ear = new DataInputStream(socket.getInputStream());
-            mouth = new PrintStream(socket.getOutputStream());
-            //userName = "player"+i;
-            userName = "ziad"+i;
+            dataInputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new PrintStream(socket.getOutputStream());
+            userName = "player"+i;
+
             i++;
             playersList.add(this);
             //System.out.println("Test Controller");
@@ -59,13 +67,11 @@ public class ServerController {
                 public void run() {
                     while (true) {                        
                         try {
-                            
-                            String json = ear.readLine();
+                            String json = dataInputStream.readLine();
                             System.out.println("the sendRequest data in server: "+json);
-                            requestData = gson.fromJson(json, ArrayList.class);
-                            double code = (double)requestData.get(0);
-                            
-                            
+                            requestData = gson.fromJson(json, ArrayList.class);   
+                            double code = (double) requestData.get(0);
+
                             if(code == Codes.REGESTER_CODE){
                                 String jsonPlayerData = (String)requestData.get(1);
                                 System.out.println("the Player data in server: "+jsonPlayerData);
@@ -74,26 +80,42 @@ public class ServerController {
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
                                 //[1,1]
-                                //mouth.println(requestData);
+
                                 for(ServerController player : playersList){
                                     System.out.println(""+player.userName);
                                     System.out.println(""+player.playerSocket.getLocalPort());
                                     if(player.userName.equals("player2")){
                                         ArrayList test = new ArrayList();
                                         test.add("hi player 2 this message is from "+userName);
-                                        player.mouth.println(test);
+                                        player.outputStream.println(test);
                                     }
                                     if(player.userName.equals("player1")){
                                         ArrayList test = new ArrayList();
                                         test.add(100);
-                                        player.mouth.println(test);
+                                        player.outputStream.println(test);
                                     }
                                 }
-                                mouth.println(requestData);
+                                outputStream.println(requestData);
                                 
+
+                            }else if(code == Codes.LOGIN_CODE){
+                                operationCode=code;
+                                jsonPlayerData = (String)requestData.get(1);
+                                currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
+                                databaseResult = NetworkAccessLayer.login(currentPlayer.getUserName(),currentPlayer.getPassword());
+                                requestData.clear();
+                                requestData.add(Codes.LOGIN_CODE);
+                                String jsonDatabaseResult = gson.toJson(databaseResult); 
+                                requestData.add(jsonDatabaseResult);
+                                outputStream.println(requestData);
+                                currentPlayer=databaseResult;
+                                System.out.println(currentPlayer.getName());
+                                currentPlayer.setIsOnline(true); 
+                                //currentPlayer.setIsPlaying(true);  
+                                NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                sendMessageToAllPlayers(); 
                                 
-                            }else if(code == Codes.CHANGE_PASSWORD_CODE)
-                            {
+                            }else if(code == Codes.CHANGE_PASSWORD_CODE){
                                 // System.out.println("Request fronm SELECT FOR EDITPROFILE in server: "+json);
                                  String jsonPlayerData = (String)requestData.get(1);
                                  System.out.println("Edit Data in Server: "+jsonPlayerData);
@@ -101,7 +123,20 @@ public class ServerController {
                                  requestData.clear();
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
-                                 mouth.println(requestData);
+                                 outputStream.println(requestData);
+                            }else if(code == Codes.LOGOUT_CODE ){
+                                 
+                                 
+                                 currentPlayer.setIsOnline(false); 
+                                 currentPlayer.setIsPlaying(false); 
+                                 
+                                 NetworkAccessLayer.logout(currentPlayer);
+                                 
+                                 playersList.remove(this);
+                                 currentPlayer.setIsOnline(false); 
+                                 currentPlayer.setIsPlaying(false);
+                                 sendMessageToAllPlayers();
+                                 break;
                             }else if(code == Codes.SEND_INVITATION_CODE)
                             {
                                 // System.out.println("Request fron EDITPROFILE in server: "+json);
@@ -119,7 +154,7 @@ public class ServerController {
                                         requestData.clear();
                                         requestData.add(Codes.SEND_INVITATION_CODE);
                                         requestData.add(userName);
-                                        player.mouth.println(gson.toJson(requestData));
+                                        player.outputStream.println(gson.toJson(requestData));
                                     }
                                 }
                                 
@@ -145,7 +180,7 @@ public class ServerController {
                                         requestData.add(Codes.INVITATION_REPLY_CODE);
                                         requestData.add(isAccepted);
                                         requestData.add(userName);
-                                        player.mouth.println(gson.toJson(requestData));
+                                        player.outputStream.println(gson.toJson(requestData));
                                     }
                                 }
                                 
@@ -163,11 +198,20 @@ public class ServerController {
                                  requestData.add(Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE);
                                  requestData.add(dataDaseResult);
                                  System.out.println("Jeson Request Data: "+requestData.getClass());
-                                 mouth.println(requestData);
+                                 outputStream.println(requestData);
                             }
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (SQLException ex) {
+                            
+                            requestData.clear();
+                            requestData.add(operationCode);
+                            databaseResult=null;
+                            String jsonDatabaseResult = gson.toJson(databaseResult);
+                            requestData.add(jsonDatabaseResult);
+                            outputStream.println(requestData);
+                            System.out.println(ex.toString());
                         }
                     }
                 }
@@ -178,6 +222,29 @@ public class ServerController {
         } catch (IOException ex) {
             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+  
     }
     
+    public void sendMessageToAllPlayers(){
+        
+        try {
+            ArrayList result=new ArrayList<>();
+            result.add(Codes.GET_ONLINE_PLAYERS); 
+            onlinePlayers=NetworkAccessLayer.getOnlinePlayers();
+            String jsonDatabaseResult = gson.toJson(onlinePlayers);
+            result.add(jsonDatabaseResult);
+            
+            for(ServerController player : playersList){
+                
+                player.outputStream.println(result);
+                
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+    
+}
+
 }
