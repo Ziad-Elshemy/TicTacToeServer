@@ -59,7 +59,7 @@ public class DatabaseDaoImpl implements DatabaseDao{
             result = pst.executeUpdate();
             
         } catch (SQLException ex) {
-            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+           // Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
         }
         return result;

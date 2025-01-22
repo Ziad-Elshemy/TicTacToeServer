@@ -51,14 +51,14 @@ public class ServerController {
             playerSocket = socket;
             dataInputStream = new DataInputStream(socket.getInputStream());
             outputStream = new PrintStream(socket.getOutputStream());
-            userName = "player"+i;
+           
 
-            i++;
+            
             playersList.add(this);
             //System.out.println("Test Controller");
             System.out.println("==========================");
             for(ServerController player : playersList){
-                System.out.println(""+player.userName);
+                System.out.println("names: "+player.userName);
                 
             }
             System.out.println("==========================");
@@ -73,32 +73,18 @@ public class ServerController {
                             double code = (double) requestData.get(0);
 
                             if(code == Codes.REGESTER_CODE){
+                                
                                 String jsonPlayerData = (String)requestData.get(1);
                                 System.out.println("the Player data in server: "+jsonPlayerData);
                                 int databaseResult = myDatabase.register(jsonPlayerData);
                                 requestData.clear();
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
-                                //[1,1]
-
-                                for(ServerController player : playersList){
-                                    System.out.println(""+player.userName);
-                                    System.out.println(""+player.playerSocket.getLocalPort());
-                                    if(player.userName.equals("player2")){
-                                        ArrayList test = new ArrayList();
-                                        test.add("hi player 2 this message is from "+userName);
-                                        player.outputStream.println(test);
-                                    }
-                                    if(player.userName.equals("player1")){
-                                        ArrayList test = new ArrayList();
-                                        test.add(100);
-                                        player.outputStream.println(test);
-                                    }
-                                }
                                 outputStream.println(requestData);
                                 
 
                             }else if(code == Codes.LOGIN_CODE){
+                                
                                 operationCode=code;
                                 jsonPlayerData = (String)requestData.get(1);
                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);                                
@@ -109,11 +95,16 @@ public class ServerController {
                                 requestData.add(jsonDatabaseResult);
                                 outputStream.println(requestData);
                                 currentPlayer=databaseResult;
+                                
+                                if(currentPlayer!=null){
+                                
                                 System.out.println(currentPlayer.getName());
                                 currentPlayer.setIsOnline(true); 
+                                userName = currentPlayer.getUserName();                                                                        
                                 //currentPlayer.setIsPlaying(true);  
                                 NetworkAccessLayer.makePlayerOnline(currentPlayer);
-                                sendMessageToAllPlayers(); 
+                                sendMessageToAllPlayers();
+                                } 
                                 
                             }else if(code == Codes.CHANGE_PASSWORD_CODE){
                                 // System.out.println("Request fronm SELECT FOR EDITPROFILE in server: "+json);
@@ -131,11 +122,13 @@ public class ServerController {
                                  currentPlayer.setIsPlaying(false); 
                                  
                                  NetworkAccessLayer.logout(currentPlayer);
-                                 
                                  playersList.remove(this);
                                  currentPlayer.setIsOnline(false); 
                                  currentPlayer.setIsPlaying(false);
+                                 NetworkAccessLayer.makePlayerOnline(currentPlayer);
                                  sendMessageToAllPlayers();
+                                 currentPlayer=null;
+
                                  break;
                             }else if(code == Codes.SEND_INVITATION_CODE)
                             {
@@ -148,9 +141,9 @@ public class ServerController {
                                  System.out.println("user name of reciever player in Server: "+player_data.getUserName());
                                  
                                  for(ServerController player : playersList){
-                                    //System.out.println(""+player.userName);
-                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                 
                                     if(player.userName.equals(player_data.getUserName().toString())){
+                                        System.out.println(player.currentPlayer.getUserName()+"================"+player.userName);
                                         requestData.clear();
                                         requestData.add(Codes.SEND_INVITATION_CODE);
                                         requestData.add(userName);
@@ -181,6 +174,15 @@ public class ServerController {
                                         requestData.add(isAccepted);
                                         requestData.add(userName);
                                         player.outputStream.println(gson.toJson(requestData));
+                                        if(isAccepted==1.0){
+                                            
+                                             currentPlayer.setIsPlaying(true);  
+                                             NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                             
+                                             player_data.setIsPlaying(true);  
+                                             NetworkAccessLayer.makePlayerOnline(player_data);
+                                        }
+                                        System.out.println(isAccepted+"==========================================");
                                     }
                                 }
                                 
