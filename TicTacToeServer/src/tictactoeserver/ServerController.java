@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.scene.control.TextArea;
 import tictactoedb.NetworkAccessLayer;
 import tictactoedb.DatabaseDao;
 import tictactoedb.PlayerDto;
@@ -45,10 +47,16 @@ public class ServerController {
     private String jsonPlayerData;
     double operationCode;
     private ArrayList onlinePlayers;
+    private OnboardStatisticController onboardStatisticController;
+    private TextArea receivedDataArea;
+
+
     double code ;
     
     
-    public ServerController(Socket socket){
+    public ServerController(Socket socket ,OnboardStatisticController onboardStatisticController , TextArea receivedDataArea){
+        this.onboardStatisticController = onboardStatisticController;
+        this.receivedDataArea = receivedDataArea;
         try {
             playerSocket = socket;
             dataInputStream = new DataInputStream(socket.getInputStream());
@@ -86,8 +94,13 @@ public class ServerController {
                                 requestData.add(Codes.REGESTER_CODE);
                                 requestData.add(databaseResult);
                                 outputStream.println(requestData);
-                                
-
+                                currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);  
+                                if (onboardStatisticController != null) {
+                                    Platform.runLater(() -> {
+                                        onboardStatisticController.updatePlayerStatusChart();
+                                        onboardStatisticController.appendTextToArea(receivedDataArea, "A new player  " + currentPlayer.getUserName() + " has registered.\n");  
+                                    });
+                                    }
                             }else if(code == Codes.LOGIN_CODE){
                                 
                                 operationCode=code;
@@ -108,6 +121,13 @@ public class ServerController {
                                 userName = currentPlayer.getUserName();                                                                        
                                 NetworkAccessLayer.updateUserState(currentPlayer);
                                 sendMessageToAllPlayers();
+                                 // Notify OnboardStatisticController to update available players
+                                 if (onboardStatisticController != null) {
+                                    Platform.runLater(() -> {
+                                        onboardStatisticController.updateAvailablePlayers();
+                                        onboardStatisticController.updatePlayerStatusChart();
+                                        onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has logged in.\n");                                    });
+                                    }
                                 
                                 } 
                                 
@@ -119,20 +139,41 @@ public class ServerController {
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
                                  outputStream.println(requestData);
-                            }
-                            else if(code == Codes.LOGOUT_CODE ){
+                                 if (onboardStatisticController != null) {
+                                    Platform.runLater(() -> {
+                                        onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has changed password .\n");                                    });
+                                    }
+                            }else if(code == Codes.LOGOUT_CODE ){
                                  
+                                 if (onboardStatisticController != null) {
+                                    Platform.runLater(() -> {
+                                        onboardStatisticController.updateAvailablePlayers();
+                                        onboardStatisticController.updatePlayerStatusChart();
+                                        onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has logged out.\n");
+                                    });
+                                 }
                                 if(currentPlayer!=null){
                                  
                                     currentPlayer.setIsOnline(false); 
                                     currentPlayer.setIsPlaying(false); 
-
+                                    
                                     NetworkAccessLayer.logout(currentPlayer);
                                     playersList.remove(this);
                                     currentPlayer.setIsOnline(false); 
                                     currentPlayer.setIsPlaying(false);
                                     NetworkAccessLayer.updateUserState(currentPlayer);
                                     sendMessageToAllPlayers();
+                                    currentPlayer=null;
+                                    
+                                    // Notify OnboardStatisticController to update available players
+                                    if (onboardStatisticController != null) {
+                                        Platform.runLater(() -> {
+                                            onboardStatisticController.updateAvailablePlayers();
+                                            onboardStatisticController.updatePlayerStatusChart();
+                                        });
+                                    }
+
+                                    break;
                                 }
                             }
                             else if(code == Codes.SEND_INVITATION_CODE)
@@ -184,8 +225,15 @@ public class ServerController {
                                             currentPlayer.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(currentPlayer);
                                              
-                                            player_data.setIsPlaying(true);  
-                                            NetworkAccessLayer.updateUserState(player_data);
+                                             player_data.setIsPlaying(true);  
+                                             NetworkAccessLayer.updateUserState(player_data);
+                                             if (onboardStatisticController != null) {
+                                                Platform.runLater(() -> {
+                                                    onboardStatisticController.updateAvailablePlayers();
+                                                    onboardStatisticController.updatePlayerStatusChart();
+                                                    onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has started game \n");
+                                                });
+                                            }
                                         }
                                         System.out.println(isAccepted+"==========================================");
                                     }
@@ -206,6 +254,11 @@ public class ServerController {
                                  requestData.add(dataDaseResult);
                                  System.out.println("Jeson Request Data: "+requestData.getClass());
                                  outputStream.println(requestData);
+                                 if (onboardStatisticController != null) {
+                                                Platform.runLater(() -> {
+                                                    onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " etied profile \n");
+                                                });
+                                            }
                             }
                             else if(code == Codes.SEND_PLAY_ON_BOARD_CODE)
                             {
@@ -237,6 +290,13 @@ public class ServerController {
                                         requestData.add(enemySympol);
                                         requestData.add(clicked_btn_id);
                                         player.outputStream.println(gson.toJson(requestData));
+                                        if (onboardStatisticController != null) {
+                                                Platform.runLater(() -> {
+                                                    onboardStatisticController.updateAvailablePlayers();
+                                                    onboardStatisticController.updatePlayerStatusChart();
+                                                    onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " send invite \n");
+                                                });
+                                            }
                                     }
                                 }
                                 
@@ -259,6 +319,13 @@ public class ServerController {
                                         requestData.add(Codes.PLAY_AGAIN_CODE);
                                         requestData.add(userName);
                                         player.outputStream.println(gson.toJson(requestData));
+                                        if (onboardStatisticController != null) {
+                                                Platform.runLater(() -> {
+                                                    onboardStatisticController.updateAvailablePlayers();
+                                                    onboardStatisticController.updatePlayerStatusChart();
+                                                    onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has started game \n");
+                                                });
+                                            }
                                     }
                                 }
                                 
@@ -357,5 +424,44 @@ public class ServerController {
     
     
 }
+    
+public void handleGameResult(String winnerUsername, String loserUsername) {
+    try {
+
+        if (!DatabaseDaoImpl.playerExists(winnerUsername)) {
+            throw new SQLException("Winner username not found: " + winnerUsername);
+        }
+        if (!DatabaseDaoImpl.playerExists(loserUsername)) {
+            throw new SQLException("Loser username not found: " + loserUsername);
+        }
+
+
+        DatabaseDaoImpl.updatePlayerScore(winnerUsername, 1); 
+        DatabaseDaoImpl.updatePlayerScore(loserUsername, 0); 
+
+        // Notify OnboardStatisticController to update top players
+        if (onboardStatisticController != null) {
+            Platform.runLater(() -> {
+                onboardStatisticController.updateTopPlayers();
+                onboardStatisticController.appendTextToArea(receivedDataArea, "Updated scores for " + winnerUsername + " and " + loserUsername + ".\n");
+            });
+        } else {
+            System.err.println("OnboardStatisticController is not initialized.");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        if (onboardStatisticController != null) {
+            Platform.runLater(() -> {
+                onboardStatisticController.appendTextToArea(receivedDataArea, "Error updating scores: " + e.getMessage() + "\n");
+            });
+        }
+    }
+}
+    
+    public void updateAvailablePlayers() {
+        Platform.runLater(() -> {
+            onboardStatisticController.updateAvailablePlayers();
+        });
+    }
 
 }
