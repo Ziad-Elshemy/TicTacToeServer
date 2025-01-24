@@ -20,12 +20,12 @@ public class NetworkAccessLayer {
             player=new PlayerDto();
             player.setUserName(DatabaseDaoImpl.playerResult.getString(1)); 
             player.setName(DatabaseDaoImpl.playerResult.getString(2));
-            System.out.println(player.getName());
             player.setPassword(DatabaseDaoImpl.playerResult.getString(3));
             player.setScore(DatabaseDaoImpl.playerResult.getInt(4));
             player.setIsOnline(DatabaseDaoImpl.playerResult.getBoolean(5)); 
             player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6)); 
-
+            player.setGender(DatabaseDaoImpl.playerResult.getString(7));
+ 
         }else{
 
             player=null;
@@ -36,6 +36,8 @@ public class NetworkAccessLayer {
         return player;
          
     }
+    
+    
     
     
     public static PlayerDto register(PlayerDto player) throws SQLException{
@@ -52,6 +54,8 @@ public class NetworkAccessLayer {
             player.setScore(DatabaseDaoImpl.playerResult.getInt(4));
             player.setIsOnline(DatabaseDaoImpl.playerResult.getBoolean(5)); 
             player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6)); 
+            player.setGender(DatabaseDaoImpl.playerResult.getString(7));
+
 
         }else{
 
@@ -67,14 +71,14 @@ public class NetworkAccessLayer {
     
     public static boolean logout(PlayerDto player) throws SQLException{
         
-         result=DatabaseDaoImpl.update(player); 
+         result=DatabaseDaoImpl.updateUserState(player); 
         
          return result;
     }
     
-    public static boolean makePlayerOnline(PlayerDto player) throws SQLException{
+    public static boolean updateUserState(PlayerDto player) throws SQLException{
         
-         result=DatabaseDaoImpl.update(player); 
+         result=DatabaseDaoImpl.updateUserState(player); 
          return result;
     }
     
@@ -93,7 +97,9 @@ public class NetworkAccessLayer {
             player.setPassword(DatabaseDaoImpl.playerResult.getString(3));
             player.setScore(DatabaseDaoImpl.playerResult.getInt(4));
             player.setIsOnline(DatabaseDaoImpl.playerResult.getBoolean(5)); 
-            player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6)); 
+            player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6));
+            player.setGender(DatabaseDaoImpl.playerResult.getString(7));
+
             
             onlinePlayersArray.add(player);
 

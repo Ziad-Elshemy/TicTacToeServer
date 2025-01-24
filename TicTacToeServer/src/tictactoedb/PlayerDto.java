@@ -17,6 +17,15 @@ public class PlayerDto {
     private boolean isOnline;
     private boolean isPlaying;
     private int score;
+    private String gender;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public String getUserName() {
         return userName;
