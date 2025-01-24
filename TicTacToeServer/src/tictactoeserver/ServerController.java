@@ -134,6 +134,7 @@ public class ServerController {
                                 }
                             }else if(code == Codes.SEND_INVITATION_CODE)
                             {
+
                                  String recieverUsername = (String)requestData.get(1);
                                  System.out.println("object of reciever player in Server: "+recieverUsername);
                                  
@@ -183,6 +184,63 @@ public class ServerController {
                                              NetworkAccessLayer.updateUserState(player_data);
                                         }
                                         System.out.println(isAccepted+"==========================================");
+                                    }
+                                }
+                                
+                            }
+                            
+                            else if(code == Codes.SEND_PLAY_ON_BOARD_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                String gameData = (String)requestData.get(1);
+                                 
+                                 System.out.println("object of sender game_data in Server: "+gameData);
+                                 ArrayList<String> game_data = gson.fromJson(gameData, ArrayList.class);
+                                 System.out.println("user name of enemy player in Server: "+game_data.get(0));
+                                 String enemyUsername = (String)game_data.get(0);
+                                 String enemySympol = (String)game_data.get(1);
+                                 String clicked_btn_id = (String)game_data.get(2);
+                                 System.out.println("user name of reciever player in Server: "+enemyUsername);
+                                 System.out.println("object of reciever player in Server: "+enemySympol);
+                                 
+                                 //PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 
+                                 
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                     System.out.println("players list: "+player.userName);
+                                    if(player.userName.equals(enemyUsername)){
+                                        System.out.println("test SEND_PLAY_ON_BOARD_CODE");
+                                        requestData.clear();
+                                        requestData.add(Codes.SEND_PLAY_ON_BOARD_CODE);
+                                        requestData.add(userName);
+                                        requestData.add(enemySympol);
+                                        requestData.add(clicked_btn_id);
+                                        player.outputStream.println(gson.toJson(requestData));
+                                    }
+                                }
+                                
+                            }
+                            else if(code == Codes.PLAY_AGAIN_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                 String revieverUsername = (String)requestData.get(1);
+                                 System.out.println("object of reciever player in Server: "+revieverUsername);
+                                 
+                                 //PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 
+                                 //System.out.println("user name of reciever player in Server: "+player_data.getUserName());
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                    if(player.userName.equals(revieverUsername)){
+                                        requestData.clear();
+                                        requestData.add(Codes.PLAY_AGAIN_CODE);
+                                        requestData.add(userName);
+                                        player.outputStream.println(gson.toJson(requestData));
                                     }
                                 }
                                 
