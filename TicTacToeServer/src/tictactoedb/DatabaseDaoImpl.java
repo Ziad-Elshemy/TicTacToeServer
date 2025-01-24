@@ -124,6 +124,7 @@ public class DatabaseDaoImpl implements DatabaseDao{
          statement.setBoolean(7, player.getIsPlaying());
          int resultInt = statement.executeUpdate();
          result=selectAll();
+         
          return resultInt != 0;
     }
     
