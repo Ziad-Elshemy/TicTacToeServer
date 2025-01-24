@@ -51,15 +51,16 @@ public class DatabaseDaoImpl implements DatabaseDao{
 //            player.setPassword("raed123");
 
             PlayerDto player = gson.fromJson(json, PlayerDto.class);
-            PreparedStatement pst = con.prepareStatement("insert into Players (username , name , password ) values (? , ? , ?)");
+            PreparedStatement pst = con.prepareStatement("insert into Players (username , name , password , gender ) values (? , ? , ? , ?)");
             pst.setString(1, player.getUserName());
             pst.setString(2, player.getName());
             pst.setString(3, player.getPassword());
+            pst.setString(4, player.getGender()); 
             
             result = pst.executeUpdate();
             
         } catch (SQLException ex) {
-            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+           // Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
         }
         return result;
@@ -71,10 +72,10 @@ public class DatabaseDaoImpl implements DatabaseDao{
         try {
             PlayerDto player = this.gson.fromJson(gsonrequest, PlayerDto.class);
             //System.out.println(" IN editProfile UserNAme: "+player.getUserName()+" Password: "+player.getPassword());
-            PreparedStatement pst = con.prepareStatement("UPDATE PLAYERS SET PASSWORD = ? WHERE USERNAME = ?");
-            pst.setString(1, player.getPassword());
-            pst.setString(2, player.getUserName());
-            result = pst.executeUpdate();
+            statement = con.prepareStatement("UPDATE PLAYERS SET PASSWORD = ? WHERE USERNAME = ?");
+            statement.setString(1, player.getPassword());
+            statement.setString(2, player.getUserName());
+            result = statement.executeUpdate();
             
         } catch (SQLException ex) {
             Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
@@ -93,9 +94,9 @@ public class DatabaseDaoImpl implements DatabaseDao{
             
             System.out.println("DTO selectInfoForEdidProfilePage");
           //  Connection con = getConnection();
-            PreparedStatement pst = con.prepareStatement("SELECT USERNAME , NAME , SCORE FROM PLAYERS WHERE USERNAME = ?",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-            pst.setString(1, usename);
-            selectResult = pst.executeQuery();
+            statement = con.prepareStatement("SELECT USERNAME , NAME , SCORE FROM PLAYERS WHERE USERNAME = ?",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            statement.setString(1, usename);
+            selectResult = statement.executeQuery();
             selectResult.first();
             System.out.println("SeclectForEdit :"+selectResult.getString("NAME"));
             player.setUserName(selectResult.getString("USERNAME"));
@@ -113,15 +114,17 @@ public class DatabaseDaoImpl implements DatabaseDao{
     }
    public static boolean insert(PlayerDto player) throws SQLException {
         
-         statement = con.prepareStatement("INSERT INTO PLAYERS (username, name, password, score, is_online, is_playing) VALUES (?, ?, ?,?,?,?)");
+         statement = con.prepareStatement("INSERT INTO PLAYERS (username, name, password, score, gender,is_online, is_playing) VALUES (?, ?, ?,?,?,?,?)");
          statement.setString(1, player.getUserName());
          statement.setString(2, player.getName());
          statement.setString(3, player.getPassword());
          statement.setInt(4, player.getScore());
-         statement.setBoolean(5,player.getIsOnline());
-         statement.setBoolean(6, player.getIsPlaying());
+         statement.setString(5,player.getGender()); 
+         statement.setBoolean(6,player.getIsOnline());
+         statement.setBoolean(7, player.getIsPlaying());
          int resultInt = statement.executeUpdate();
          result=selectAll();
+         
          return resultInt != 0;
     }
     
@@ -134,15 +137,13 @@ public class DatabaseDaoImpl implements DatabaseDao{
         return resultInt != 0;  
     }
      
-    public static boolean update(PlayerDto player) throws SQLException {
+    public static boolean updateUserState(PlayerDto player) throws SQLException {
         
-         statement = con.prepareStatement("UPDATE PLAYERS SET name = ? , password = ? , score = ? , is_online = ? , is_playing = ? WHERE username=?");
-         statement.setString(6, player.getUserName());
-         statement.setString(1, player.getName());
-         statement.setString(2, player.getPassword());
-         statement.setInt(3, player.getScore());
-         statement.setBoolean(4, player.getIsOnline());
-         statement.setBoolean(5, player.getIsPlaying());
+         statement = con.prepareStatement("UPDATE PLAYERS SET score = ? , is_online = ? , is_playing = ? WHERE username=?");
+         statement.setString(4, player.getUserName());
+         statement.setInt(1, player.getScore());
+         statement.setBoolean(2, player.getIsOnline());
+         statement.setBoolean(3, player.getIsPlaying());
          int resultInt = statement.executeUpdate();
          
          result=selectAll();
