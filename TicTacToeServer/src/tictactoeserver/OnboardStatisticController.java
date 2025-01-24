@@ -106,11 +106,11 @@ public class OnboardStatisticController implements Initializable {
             double inGamePercentage = (inGame / (double) total) * 100;
 
             PieChart.Data onlineData = new PieChart.Data(
-                    String.format("Online %.1f%%", onlinePercentage), online);
+                    String.format("Online%.1f%%", onlinePercentage), online);
             PieChart.Data offlineData = new PieChart.Data(
-                    String.format("Offline %.1f%%", offlinePercentage), offline);
+                    String.format("Offline%.1f%%", offlinePercentage), offline);
             PieChart.Data inGameData = new PieChart.Data(
-                    String.format("In Game %.1f%%", inGamePercentage), inGame);
+                    String.format("InGame%.1f%%", inGamePercentage), inGame);
 
             player_status_chart.setData(FXCollections.observableArrayList(onlineData, offlineData, inGameData));
         });
