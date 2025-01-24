@@ -34,6 +34,7 @@ public class ServerController {
     static Vector<ServerController> playersList = new Vector<>();
     static int i =1;
     Thread thread;
+    String enemyUserName;
     String userName;
     String playSympol;
     ArrayList requestData;
@@ -118,21 +119,23 @@ public class ServerController {
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
                                  outputStream.println(requestData);
-                            }else if(code == Codes.LOGOUT_CODE ){
+                            }
+                            else if(code == Codes.LOGOUT_CODE ){
                                  
                                 if(currentPlayer!=null){
                                  
-                                 currentPlayer.setIsOnline(false); 
-                                 currentPlayer.setIsPlaying(false); 
-                                 
-                                 NetworkAccessLayer.logout(currentPlayer);
-                                 playersList.remove(this);
-                                 currentPlayer.setIsOnline(false); 
-                                 currentPlayer.setIsPlaying(false);
-                                 NetworkAccessLayer.updateUserState(currentPlayer);
-                                 sendMessageToAllPlayers();
+                                    currentPlayer.setIsOnline(false); 
+                                    currentPlayer.setIsPlaying(false); 
+
+                                    NetworkAccessLayer.logout(currentPlayer);
+                                    playersList.remove(this);
+                                    currentPlayer.setIsOnline(false); 
+                                    currentPlayer.setIsPlaying(false);
+                                    NetworkAccessLayer.updateUserState(currentPlayer);
+                                    sendMessageToAllPlayers();
                                 }
-                            }else if(code == Codes.SEND_INVITATION_CODE)
+                            }
+                            else if(code == Codes.SEND_INVITATION_CODE)
                             {
 
                                  String recieverUsername = (String)requestData.get(1);
@@ -176,12 +179,13 @@ public class ServerController {
                                         requestData.add(userName);
                                         player.outputStream.println(gson.toJson(requestData));
                                         if(isAccepted==1.0){
-                                            
-                                             currentPlayer.setIsPlaying(true);  
-                                             NetworkAccessLayer.updateUserState(currentPlayer);
+                                            enemyUserName = player_data.getUserName();
+                                            player.enemyUserName = userName;
+                                            currentPlayer.setIsPlaying(true);  
+                                            NetworkAccessLayer.updateUserState(currentPlayer);
                                              
-                                             player_data.setIsPlaying(true);  
-                                             NetworkAccessLayer.updateUserState(player_data);
+                                            player_data.setIsPlaying(true);  
+                                            NetworkAccessLayer.updateUserState(player_data);
                                         }
                                         System.out.println(isAccepted+"==========================================");
                                     }
@@ -259,6 +263,54 @@ public class ServerController {
                                 }
                                 
                             }
+                            else if(code == Codes.UPDATE_PLAYER_SCORE){
+                                
+                                operationCode=code;
+                                double d_score =(double) requestData.get(1);
+//                                userName = currentPlayer.getUserName();
+                                int score = (int)d_score;
+                                System.out.println("Score on server is:"+score);
+                                //currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class);  
+                                currentPlayer.setUserName(userName);
+                                currentPlayer.setIsPlaying(true);
+                                currentPlayer.setScore(score);
+                                if(NetworkAccessLayer.updateUserState(currentPlayer)){
+                                    requestData.clear();
+                                    requestData.add(Codes.UPDATE_PLAYER_SCORE);
+                                    requestData.add("1");
+                                    outputStream.println(requestData);
+                                    sendMessageToAllPlayers();
+                                }else{
+                                    requestData.clear();
+                                    requestData.add(Codes.UPDATE_PLAYER_SCORE);
+                                    requestData.add("0");
+                                    outputStream.println(requestData);
+                                    System.out.println("Can't update the score");
+                                }
+ 
+                                
+                            }
+                            else if(code == Codes.LEAVE_GAME_CODE ){
+                                 
+                                if(currentPlayer!=null){
+                                
+                                    currentPlayer.setIsPlaying(false);
+                                    NetworkAccessLayer.updateUserState(currentPlayer);
+                                    
+                                    for(ServerController player : playersList){
+                                    
+                                        if(player.userName.equals(enemyUserName)){
+                                            player.currentPlayer.setIsPlaying(false);
+                                            NetworkAccessLayer.updateUserState(player.currentPlayer);
+                                            requestData.clear();
+                                            requestData.add(Codes.LEAVE_GAME_CODE);
+                                            player.outputStream.println(requestData);
+                                        }
+                                    }
+                                    sendMessageToAllPlayers();
+                                }
+                            }
+                            
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
