@@ -83,35 +83,7 @@ public class DatabaseDaoImpl implements DatabaseDao{
         }
         return result;
     }
-    
-    @Override
-  public String selectInfoForEdidProfilePage(String usename)
-    {
-        PlayerDto player = new PlayerDto();
-        String playerJson=null;
-        ResultSet selectResult;
-        try {
-            
-            System.out.println("DTO selectInfoForEdidProfilePage");
-          //  Connection con = getConnection();
-            statement = con.prepareStatement("SELECT USERNAME , NAME , SCORE FROM PLAYERS WHERE USERNAME = ?",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-            statement.setString(1, usename);
-            selectResult = statement.executeQuery();
-            selectResult.first();
-            System.out.println("SeclectForEdit :"+selectResult.getString("NAME"));
-            player.setUserName(selectResult.getString("USERNAME"));
-            player.setName(selectResult.getString("NAME"));
-            player.setScore(selectResult.getInt("SCORE"));
-            playerJson = gson.toJson(player);
-            System.out.println("jeson sent from DataDataBase: "+playerJson);
-            selectResult.close();
-            pst.close();
-            con.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return playerJson;
-    }
+
    public static boolean insert(PlayerDto player) throws SQLException {
         
          statement = con.prepareStatement("INSERT INTO PLAYERS (username, name, password, score, gender,is_online, is_playing) VALUES (?, ?, ?,?,?,?,?)");

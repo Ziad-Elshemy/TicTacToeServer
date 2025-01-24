@@ -187,21 +187,6 @@ public class ServerController {
                                 }
                                 
                             }
-                            else if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
-                            {
-                                 System.out.println("SERVER CONTROLLER EDITPROFILE: "+json);
-                                 String jsonPlayerData = (String)requestData.get(1);
-                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
-                                 String dataDaseResult = myDatabase.selectInfoForEdidProfilePage(jsonPlayerData);
-                                 requestData.clear();
-                                 gson.toJson(dataDaseResult);
-                                 
-                                 //System.out.println("Player in Server Contoller : "+dataDaseResult.getName()+","+dataDaseResult.getUserName()+","+dataDaseResult.getScore());
-                                 requestData.add(Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE);
-                                 requestData.add(dataDaseResult);
-                                 System.out.println("Jeson Request Data: "+requestData.getClass());
-                                 outputStream.println(requestData);
-                            }
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
