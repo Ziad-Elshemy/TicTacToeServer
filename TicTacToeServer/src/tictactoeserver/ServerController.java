@@ -245,6 +245,16 @@ public class ServerController {
                                 }
                                 
                             }
+                            else if(code == Codes.DELETE_ACCOUNT_CODE)
+                            {
+                                int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
+                                requestData.clear();
+                                requestData.add(Codes.DELETE_ACCOUNT_CODE);
+                                requestData.add(deleteResult);
+                                System.out.println("ServerController Delete"+requestData);
+                                outputStream.println(requestData);
+                                
+                            }
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);

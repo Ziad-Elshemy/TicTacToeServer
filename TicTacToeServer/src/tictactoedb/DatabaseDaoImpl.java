@@ -148,6 +148,28 @@ public class DatabaseDaoImpl implements DatabaseDao{
             return playerResult;
 
     }
+
+    @Override
+    public int deleteAccount(String jsonPlayer) {
+        int excutionStatus = 0;
+        try {
+            PlayerDto player = gson.fromJson(jsonPlayer, PlayerDto.class);
+            PreparedStatement stmnt = con.prepareStatement("DELETE FROM PLAYERS WHERE USERNAME = ?");
+            stmnt.setString(1,player.getUserName() );
+            int result = stmnt.executeUpdate();
+            if(result>0)
+            {
+                excutionStatus=1;
+                playerResult = stmnt.executeQuery();
+            }
+            stmnt.close();
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseDaoImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return excutionStatus;
+    }
+    
         
     
 }
