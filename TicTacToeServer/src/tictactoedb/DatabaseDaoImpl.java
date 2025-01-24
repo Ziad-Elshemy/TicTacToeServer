@@ -12,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.derby.jdbc.ClientDriver;
@@ -177,8 +179,93 @@ public class DatabaseDaoImpl implements DatabaseDao{
 
     }
         
+public static List<String> getAvailablePlayers() {
+    List<String> availablePlayers = new ArrayList<>();
+    try {
+        ResultSet resultSet = selectOnlineUsers(); // Assuming this fetches online users from the database
+        while (resultSet.next()) {
+            String username = resultSet.getString("USERNAME");
+            // Add the username to the list
+            availablePlayers.add(username);
+        }
+        resultSet.close();
+    } catch (SQLException ex) {
+        Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return availablePlayers;
+}
     
+    public static List<String> getTopPlayers() {
+        List<String> topPlayers = new ArrayList<>();
+        try {
+            // Query to select players ordered by score descending
+            String queryString = "SELECT * FROM PLAYERS ORDER BY SCORE DESC";
+            statement = con.prepareStatement(queryString);
+            ResultSet resultSet = statement.executeQuery();
+
+            // Retrieve top players
+            while (resultSet.next()) {
+                String name = resultSet.getString("NAME");
+                int score = resultSet.getInt("SCORE");
+                topPlayers.add(name + " - " + score);
+            }
+            resultSet.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return topPlayers;
 }
 
+    public static void updatePlayerScore(String username, int scoreChange) throws SQLException {
+        
+        if (scoreChange == 0) {
+            return; 
+        }
+
+        String query = "UPDATE players SET score = score + ? WHERE username = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, scoreChange);
+            pstmt.setString(2, username);
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("No player found with username: " + username);
+            }
+        }
+    }
     
-    
+    public static boolean playerExists(String username) throws SQLException {
+    String query = "SELECT COUNT(*) FROM players WHERE username = ?";
+    try (PreparedStatement pstmt = con.prepareStatement(query)) {
+        pstmt.setString(1, username);
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+    }
+    return false;
+    }
+
+public static int[] getPlayerStatusCounts() throws SQLException {
+    int[] counts = new int[3]; // [online, offline, inGame]
+    String query = "SELECT is_online, is_playing FROM players";
+
+    try (PreparedStatement pstmt = con.prepareStatement(query);
+         ResultSet rs = pstmt.executeQuery()) { 
+
+        while (rs.next()) {
+            boolean isOnline = rs.getBoolean("is_online");
+            boolean isPlaying = rs.getBoolean("is_playing");
+            if (isOnline) {
+                if (isPlaying) {
+                    counts[2]++; // inGame
+                } else {
+                    counts[0]++; // online
+                }
+            } else {
+                counts[1]++; // offline
+            }
+        }
+    }
+    return counts;
+}
+}
