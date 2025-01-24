@@ -199,6 +199,28 @@ public class ServerController {
                                 }
                                 
                             }
+                            else if(code == Codes.PLAY_AGAIN_CODE)
+                            {
+                                // System.out.println("Request fron EDITPROFILE in server: "+json);
+                                 String revieverUsername = (String)requestData.get(1);
+                                 System.out.println("object of reciever player in Server: "+revieverUsername);
+                                 
+                                 //PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 
+                                 //System.out.println("user name of reciever player in Server: "+player_data.getUserName());
+                                 
+                                 for(ServerController player : playersList){
+                                    //System.out.println(""+player.userName);
+                                    //System.out.println(""+player.playerSocket.getLocalPort());
+                                    if(player.userName.equals(revieverUsername)){
+                                        requestData.clear();
+                                        requestData.add(Codes.PLAY_AGAIN_CODE);
+                                        requestData.add(userName);
+                                        player.mouth.println(gson.toJson(requestData));
+                                    }
+                                }
+                                
+                            }
                             
                         } catch (IOException ex) {
                             Logger.getLogger(ServerController.class.getName()).log(Level.SEVERE, null, ex);
