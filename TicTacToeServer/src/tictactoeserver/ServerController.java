@@ -140,10 +140,10 @@ public class ServerController {
                             }else if(code == Codes.SEND_INVITATION_CODE)
                             {
                                 // System.out.println("Request fron EDITPROFILE in server: "+json);
-                                 String revieverUsername = (String)requestData.get(1);
-                                 System.out.println("object of reciever player in Server: "+revieverUsername);
+                                 String recieverUsername = (String)requestData.get(1);
+                                 System.out.println("object of reciever player in Server: "+recieverUsername);
                                  
-                                 PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 PlayerDto player_data = gson.fromJson(recieverUsername, PlayerDto.class);
                                  
                                  System.out.println("user name of reciever player in Server: "+player_data.getUserName());
                                  
