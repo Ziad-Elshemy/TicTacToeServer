@@ -50,6 +50,7 @@ public class ServerController {
     private TextArea receivedDataArea;
 
 
+    double code ;
     
     
     public ServerController(Socket socket ,OnboardStatisticController onboardStatisticController , TextArea receivedDataArea){
@@ -59,17 +60,8 @@ public class ServerController {
             playerSocket = socket;
             dataInputStream = new DataInputStream(socket.getInputStream());
             outputStream = new PrintStream(socket.getOutputStream());
-           
-
-            
             playersList.add(this);
-            //System.out.println("Test Controller");
-            System.out.println("==========================");
-            for(ServerController player : playersList){
-                System.out.println("names: "+player.userName);
-                
-            }
-            System.out.println("==========================");
+     
             thread = new Thread(){
                 @Override
                 public void run() {
@@ -78,7 +70,19 @@ public class ServerController {
                             String json = dataInputStream.readLine();
                             System.out.println("the sendRequest data in server: "+json);
                             requestData = gson.fromJson(json, ArrayList.class);   
-                            double code = (double) requestData.get(0);
+                           
+                            
+                            if(requestData!=null){
+                                
+                                code=(double) requestData.get(0);
+                            
+                            
+                            
+                            }else{
+                                
+                                break;
+                            
+                            }
 
                             if(code == Codes.REGESTER_CODE){
                                 
@@ -113,8 +117,7 @@ public class ServerController {
                                 System.out.println(currentPlayer.getName());
                                 currentPlayer.setIsOnline(true); 
                                 userName = currentPlayer.getUserName();                                                                        
-                                //currentPlayer.setIsPlaying(true);  
-                                NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                NetworkAccessLayer.updateUserState(currentPlayer);
                                 sendMessageToAllPlayers();
                                  // Notify OnboardStatisticController to update available players
                                  if (onboardStatisticController != null) {
@@ -123,10 +126,10 @@ public class ServerController {
                                         onboardStatisticController.updatePlayerStatusChart();
                                         onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has logged in.\n");                                    });
                                     }
+                                
                                 } 
                                 
                             }else if(code == Codes.CHANGE_PASSWORD_CODE){
-                                // System.out.println("Request fronm SELECT FOR EDITPROFILE in server: "+json);
                                  String jsonPlayerData = (String)requestData.get(1);
                                  System.out.println("Edit Data in Server: "+jsonPlayerData);
                                  int dataDaseResult = myDatabase.editProfile(jsonPlayerData);
@@ -141,6 +144,8 @@ public class ServerController {
                                         onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has logged out.\n");
                                     });
                                  }
+                                if(currentPlayer!=null){
+                                 
                                  currentPlayer.setIsOnline(false); 
                                  currentPlayer.setIsPlaying(false); 
                                  
@@ -148,7 +153,7 @@ public class ServerController {
                                  playersList.remove(this);
                                  currentPlayer.setIsOnline(false); 
                                  currentPlayer.setIsPlaying(false);
-                                 NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                 NetworkAccessLayer.updateUserState(currentPlayer);
                                  sendMessageToAllPlayers();
                                  currentPlayer=null;
                                  
@@ -161,23 +166,22 @@ public class ServerController {
                                 };
 
                                  break;
+                                }
                             }else if(code == Codes.SEND_INVITATION_CODE)
                             {
-                                // System.out.println("Request fron EDITPROFILE in server: "+json);
-                                 String revieverUsername = (String)requestData.get(1);
-                                 System.out.println("object of reciever player in Server: "+revieverUsername);
+                                 String recieverUsername = (String)requestData.get(1);
+                                 System.out.println("object of reciever player in Server: "+recieverUsername);
                                  
-                                 PlayerDto player_data = gson.fromJson(revieverUsername, PlayerDto.class);
+                                 PlayerDto player_data = gson.fromJson(recieverUsername, PlayerDto.class);
                                  
                                  System.out.println("user name of reciever player in Server: "+player_data.getUserName());
                                  
                                  for(ServerController player : playersList){
                                  
-                                    if(player.userName.equals(player_data.getUserName().toString())){
-                                        System.out.println(player.currentPlayer.getUserName()+"================"+player.userName);
+                                    if(player.userName.equals(player_data.getUserName())){
                                         requestData.clear();
                                         requestData.add(Codes.SEND_INVITATION_CODE);
-                                        requestData.add(userName);
+                                        requestData.add(currentPlayer);
                                         player.outputStream.println(gson.toJson(requestData));
                                     }
                                 }
@@ -208,10 +212,10 @@ public class ServerController {
                                         if(isAccepted==1.0){
                                             
                                              currentPlayer.setIsPlaying(true);  
-                                             NetworkAccessLayer.makePlayerOnline(currentPlayer);
+                                             NetworkAccessLayer.updateUserState(currentPlayer);
                                              
                                              player_data.setIsPlaying(true);  
-                                             NetworkAccessLayer.makePlayerOnline(player_data);
+                                             NetworkAccessLayer.updateUserState(player_data);
                                         }
                                         System.out.println(isAccepted+"==========================================");
                                     }
