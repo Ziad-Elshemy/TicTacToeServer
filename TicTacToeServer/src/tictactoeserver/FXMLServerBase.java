@@ -1,9 +1,12 @@
 package tictactoeserver;
 
+import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
+import static tictactoeserver.ServerController.playersList;
+import utilities.Codes;
 
 public class FXMLServerBase extends AnchorPane {
 
@@ -51,6 +54,12 @@ public class FXMLServerBase extends AnchorPane {
             isStarted = false;
             startBtn.setText("START");
             startBtn.setStyle("-fx-background-color: GREEN;");
+            for(ServerController player : playersList)
+             {
+                ArrayList serverCloseRequest = new ArrayList();
+                serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
+                player.outputStream.println(serverCloseRequest);
+            }
         }
     }
 
