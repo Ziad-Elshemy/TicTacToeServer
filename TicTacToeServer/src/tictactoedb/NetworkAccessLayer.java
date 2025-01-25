@@ -17,14 +17,21 @@ public class NetworkAccessLayer {
         DatabaseDaoImpl.selectUser(username , password); 
         
         if(DatabaseDaoImpl.playerResult.next()){
-            player=new PlayerDto();
-            player.setUserName(DatabaseDaoImpl.playerResult.getString(1)); 
-            player.setName(DatabaseDaoImpl.playerResult.getString(2));
-            player.setPassword(DatabaseDaoImpl.playerResult.getString(3));
-            player.setScore(DatabaseDaoImpl.playerResult.getInt(4));
-            player.setIsOnline(DatabaseDaoImpl.playerResult.getBoolean(5)); 
-            player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6)); 
-            player.setGender(DatabaseDaoImpl.playerResult.getString(7));
+            
+            if(DatabaseDaoImpl.playerResult.getBoolean(5)){
+                player=null;
+            
+            }else{
+                player=new PlayerDto();
+                player.setUserName(DatabaseDaoImpl.playerResult.getString(1)); 
+                player.setName(DatabaseDaoImpl.playerResult.getString(2));
+                player.setPassword(DatabaseDaoImpl.playerResult.getString(3));
+                player.setScore(DatabaseDaoImpl.playerResult.getInt(4));
+                player.setIsOnline(DatabaseDaoImpl.playerResult.getBoolean(5)); 
+                player.setIsPlaying(DatabaseDaoImpl.playerResult.getBoolean(6)); 
+                player.setGender(DatabaseDaoImpl.playerResult.getString(7));
+            
+            }
  
         }else{
 
