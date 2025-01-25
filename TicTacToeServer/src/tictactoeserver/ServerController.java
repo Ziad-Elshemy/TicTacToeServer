@@ -32,7 +32,7 @@ public class ServerController {
     Gson gson = new Gson();
     DatabaseDao myDatabase = new DatabaseDaoImpl();
     private PlayerDto databaseResult;
-    private PlayerDto currentPlayer;
+    public PlayerDto currentPlayer;
     private String jsonPlayerData;
     double operationCode;
     private ArrayList onlinePlayers;
