@@ -193,21 +193,7 @@ public class ServerController {
                                 }
                                 
                             }
-                            else if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
-                            {
-                                 System.out.println("SERVER CONTROLLER EDITPROFILE: "+json);
-                                 String jsonPlayerData = (String)requestData.get(1);
-                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
-                                 String dataDaseResult = myDatabase.selectInfoForEdidProfilePage(jsonPlayerData);
-                                 requestData.clear();
-                                 gson.toJson(dataDaseResult);
-                                 
-                                 //System.out.println("Player in Server Contoller : "+dataDaseResult.getName()+","+dataDaseResult.getUserName()+","+dataDaseResult.getScore());
-                                 requestData.add(Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE);
-                                 requestData.add(dataDaseResult);
-                                 System.out.println("Jeson Request Data: "+requestData.getClass());
-                                 outputStream.println(requestData);
-                            }
+                            
                             else if(code == Codes.SEND_PLAY_ON_BOARD_CODE)
                             {
                                 // System.out.println("Request fron EDITPROFILE in server: "+json);
@@ -262,6 +248,16 @@ public class ServerController {
                                         player.outputStream.println(gson.toJson(requestData));
                                     }
                                 }
+                                
+                            }
+                            else if(code == Codes.DELETE_ACCOUNT_CODE)
+                            {
+                                int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
+                                requestData.clear();
+                                requestData.add(Codes.DELETE_ACCOUNT_CODE);
+                                requestData.add(deleteResult);
+                                System.out.println("ServerController Delete"+requestData);
+                                outputStream.println(requestData);
                                 
                             }
                             else if(code == Codes.UPDATE_PLAYER_SCORE){
