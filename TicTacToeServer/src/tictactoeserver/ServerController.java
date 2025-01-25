@@ -309,6 +309,9 @@ public class ServerController {
                             }
                             else if(code == Codes.DELETE_ACCOUNT_CODE)
                             {
+                                playersList.remove(this);
+                                int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
+                                sendMessageToAllPlayers();
                                 if (onboardStatisticController != null) {
                                         Platform.runLater(() -> {
                                             onboardStatisticController.updateAvailablePlayers();
@@ -317,7 +320,6 @@ public class ServerController {
                                             onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + "delete account \n");
                                         });
                                  }
-                                int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
                                 requestData.clear();
                                 requestData.add(Codes.DELETE_ACCOUNT_CODE);
                                 requestData.add(deleteResult);
