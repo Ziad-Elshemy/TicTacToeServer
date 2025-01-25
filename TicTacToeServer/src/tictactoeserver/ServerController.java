@@ -186,6 +186,7 @@ public class ServerController {
                                              
                                             player_data.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(player_data);
+                                            sendMessageToAllPlayers();
                                         }
                                         System.out.println(isAccepted+"==========================================");
                                     }
