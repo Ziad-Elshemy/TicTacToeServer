@@ -77,6 +77,7 @@ public class ServerController {
                             if(code == Codes.REGESTER_CODE){
                                 
                                 String jsonPlayerData = (String)requestData.get(1);
+                                currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class); 
                                 System.out.println("the Player data in server: "+jsonPlayerData);
                                 int databaseResult = myDatabase.register(jsonPlayerData);
                                 requestData.clear();
@@ -87,7 +88,7 @@ public class ServerController {
                                         Platform.runLater(() -> {
                                             onboardStatisticController.updateAvailablePlayers();
                                             onboardStatisticController.updatePlayerStatusChart();
-                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has registered in game \n");
                                         });
                                     }
                                 
@@ -124,6 +125,7 @@ public class ServerController {
                                 
                             }else if(code == Codes.CHANGE_PASSWORD_CODE){
                                  String jsonPlayerData = (String)requestData.get(1);
+                                 currentPlayer = gson.fromJson(jsonPlayerData, PlayerDto.class); 
                                  System.out.println("Edit Data in Server: "+jsonPlayerData);
                                  int dataDaseResult = myDatabase.editProfile(jsonPlayerData);
                                  requestData.clear();
@@ -132,7 +134,7 @@ public class ServerController {
                                  outputStream.println(requestData);
                                  if (onboardStatisticController != null) {
                                         Platform.runLater(() -> {
-                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has change password \n");
                                         });
                                     }
                             }
@@ -154,7 +156,7 @@ public class ServerController {
                                         Platform.runLater(() -> {
                                             onboardStatisticController.updateAvailablePlayers();
                                             onboardStatisticController.updatePlayerStatusChart();
-                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged out of game \n");
                                         });
                                     }
                                 }
@@ -176,6 +178,13 @@ public class ServerController {
                                         requestData.add(Codes.SEND_INVITATION_CODE);
                                         requestData.add(currentPlayer);
                                         player.outputStream.println(gson.toJson(requestData));
+                                           if (onboardStatisticController != null) {
+                                        Platform.runLater(() -> {
+                                            onboardStatisticController.updateAvailablePlayers();
+                                            onboardStatisticController.updatePlayerStatusChart();
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has send invitation \n");
+                                        });
+                                    }
                                     }
                                 }
                                 
@@ -218,7 +227,8 @@ public class ServerController {
                                             Platform.runLater(() -> {
                                                 onboardStatisticController.updateAvailablePlayers();
                                                 onboardStatisticController.updatePlayerStatusChart();
-                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                                onboardStatisticController.updateTopPlayers();
+                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has accept invitation \n");
                                         });
                                             sendMessageToAllPlayers();
                                         }
@@ -258,6 +268,11 @@ public class ServerController {
                                         requestData.add(enemySympol);
                                         requestData.add(clicked_btn_id);
                                         player.outputStream.println(gson.toJson(requestData));
+                                        Platform.runLater(() -> {
+                                                onboardStatisticController.updateAvailablePlayers();
+                                                onboardStatisticController.updatePlayerStatusChart();
+                                                onboardStatisticController.updateTopPlayers();
+                                        });
                                     }
                                 }
                                 
@@ -285,7 +300,7 @@ public class ServerController {
                                             onboardStatisticController.updateAvailablePlayers();
                                             onboardStatisticController.updatePlayerStatusChart();
                                             onboardStatisticController.updateTopPlayers();
-                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " need to play again \n");
                                         });
                                     }
                                     }
@@ -294,13 +309,21 @@ public class ServerController {
                             }
                             else if(code == Codes.DELETE_ACCOUNT_CODE)
                             {
+                                if (onboardStatisticController != null) {
+                                        Platform.runLater(() -> {
+                                            onboardStatisticController.updateAvailablePlayers();
+                                            onboardStatisticController.updatePlayerStatusChart();
+                                            onboardStatisticController.updateTopPlayers();
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + "delete account \n");
+                                        });
+                                 }
                                 int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
                                 requestData.clear();
                                 requestData.add(Codes.DELETE_ACCOUNT_CODE);
                                 requestData.add(deleteResult);
                                 System.out.println("ServerController Delete"+requestData);
                                 outputStream.println(requestData);
-                                
+  
                             }
                             else if(code == Codes.UPDATE_PLAYER_SCORE){
                                 
@@ -323,7 +346,8 @@ public class ServerController {
                                         Platform.runLater(() -> {
                                             onboardStatisticController.updateAvailablePlayers();
                                             onboardStatisticController.updatePlayerStatusChart();
-                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                            onboardStatisticController.updateTopPlayers();
+                                            onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " update in score \n");
                                         });
                                     }
                                 }else{
@@ -355,7 +379,8 @@ public class ServerController {
                                         Platform.runLater(() -> {
                                                 onboardStatisticController.updateAvailablePlayers();
                                                 onboardStatisticController.updatePlayerStatusChart();
-                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
+                                                onboardStatisticController.updateTopPlayers();
+                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " upfate in score \n");
                                             });
                                          }
                                         }

@@ -202,7 +202,7 @@ public static List<String> getAvailablePlayers() {
             while (resultSet.next()) {
                 String name = resultSet.getString("NAME");
                 int score = resultSet.getInt("SCORE");
-                topPlayers.add(name + " - " + score);
+                topPlayers.add(name + " : " + score);
             }
             resultSet.close();
         } catch (SQLException ex) {

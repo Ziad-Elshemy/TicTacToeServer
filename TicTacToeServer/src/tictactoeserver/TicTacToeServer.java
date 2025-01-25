@@ -12,7 +12,6 @@ import tictactoedb.DatabaseDaoImpl;
 import static tictactoeserver.ServerController.playersList;
 import utilities.Codes;
 
-
 public class TicTacToeServer extends Application {
 
     @Override
@@ -25,19 +24,20 @@ public class TicTacToeServer extends Application {
         OnboardStatisticController controller = loader.getController();
 
         // Initialize the Database DAO
-       //  DatabaseDao dp = new DatabaseDaoImpl();
-
+        //  DatabaseDao dp = new DatabaseDaoImpl();
         // If necessary, pass the DAO or other dependencies to the controller
         // controller.setDatabaseDao(dp);
-
         // Set up the scene and stage
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Tic Tac Toe Server");
         stage.show();
-        stage.setOnCloseRequest((e)->{
-             for(ServerController player : playersList)
-             {
+        stage.setOnCloseRequest((e) -> {
+            if (controller.isStarted) {
+                controller.server.stopServer();
+            }
+            for (ServerController player : playersList) {
+
                 ArrayList serverCloseRequest = new ArrayList();
                 serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
                 player.outputStream.println(serverCloseRequest);

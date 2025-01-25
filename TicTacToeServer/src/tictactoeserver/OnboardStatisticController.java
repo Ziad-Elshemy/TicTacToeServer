@@ -93,9 +93,7 @@ public class OnboardStatisticController implements Initializable {
             e.printStackTrace();
             appendTextToArea(received_data_area, "Error: " + e.getMessage() + "\n");
         }
-    }
-
-    /**
+    }    /**
      * Appends the given text to the specified TextArea.
      *
      * @param textArea The TextArea to append text to.
