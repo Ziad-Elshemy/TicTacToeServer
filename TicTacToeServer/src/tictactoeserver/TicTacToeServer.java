@@ -1,17 +1,18 @@
 package tictactoeserver;
 
+import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
 import tictactoedb.DatabaseDao;
 import tictactoedb.DatabaseDaoImpl;
+import static tictactoeserver.ServerController.playersList;
+import utilities.Codes;
 
-/**
- *
- * @author Ziad-Elshemy
- */
+
 public class TicTacToeServer extends Application {
 
     @Override
@@ -34,6 +35,14 @@ public class TicTacToeServer extends Application {
         stage.setScene(scene);
         stage.setTitle("Tic Tac Toe Server");
         stage.show();
+        stage.setOnCloseRequest((e)->{
+             for(ServerController player : playersList)
+             {
+                ArrayList serverCloseRequest = new ArrayList();
+                serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
+                player.outputStream.println(serverCloseRequest);
+            }
+        });
     }
 
     /**

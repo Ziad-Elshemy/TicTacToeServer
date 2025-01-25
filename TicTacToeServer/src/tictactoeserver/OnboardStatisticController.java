@@ -1,8 +1,12 @@
 package tictactoeserver;
 
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -12,6 +16,9 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import tictactoedb.DatabaseDaoImpl;
+import tictactoedb.NetworkAccessLayer;
+import static tictactoeserver.ServerController.playersList;
+import utilities.Codes;
 
 /**
  * FXML Controller class
@@ -56,15 +63,30 @@ public class OnboardStatisticController implements Initializable {
                 start_button.setText("STOP");
                 start_button.setStyle("-fx-background-color: GREEN;");
                 appendTextToArea(received_data_area, "Server started successfully.\n");
+                 for(ServerController player : playersList)
+                    {
+                        player.currentPlayer.setIsOnline(false);
+                        player.currentPlayer.setIsPlaying(false);
+                       try {
+                           NetworkAccessLayer.updateUserState(player.currentPlayer);
+                       } catch (SQLException ex) {
+                           Logger.getLogger(OnboardStatisticController.class.getName()).log(Level.SEVERE, null, ex);
+                       }
+                    }
 
-                // Periodically update players' data when the server starts
-                updateAvailablePlayers();
-                updateTopPlayers();
+                    updateAvailablePlayers(); // Update available players on startup
+                    updateTopPlayers(); // Update top players on startup
+                    updatePlayerStatusChart();
             } else {
                 server.stopServer();
                 isStarted = false;
                 start_button.setText("START");
                 start_button.setStyle("-fx-background-color:   #ffa62b;");
+                for (ServerController player : playersList) {
+                    ArrayList serverCloseRequest = new ArrayList();
+                    serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
+                    player.outputStream.println(serverCloseRequest);
+                }
                 appendTextToArea(received_data_area, "Server stopped successfully.\n");
             }
         } catch (Exception e) {

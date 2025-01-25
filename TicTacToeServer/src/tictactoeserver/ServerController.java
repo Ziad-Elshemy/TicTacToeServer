@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tictactoeserver;
 
 import com.google.gson.Gson;
@@ -19,19 +14,15 @@ import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 import tictactoedb.NetworkAccessLayer;
 import tictactoedb.DatabaseDao;
-import tictactoedb.PlayerDto;
 import tictactoedb.DatabaseDaoImpl;
 import tictactoedb.PlayerDto;
 import utilities.Codes;
 
-/**
- *
- * @author Ziad-Elshemy
- */
+
 public class ServerController {
     
     private DataInputStream dataInputStream;
-    private PrintStream outputStream;
+    public PrintStream outputStream;
     Socket playerSocket;
     static Vector<ServerController> playersList = new Vector<>();
     static int i =1;
@@ -43,7 +34,7 @@ public class ServerController {
     Gson gson = new Gson();
     DatabaseDao myDatabase = new DatabaseDaoImpl();
     private PlayerDto databaseResult;
-    private PlayerDto currentPlayer;
+    public PlayerDto currentPlayer;
     private String jsonPlayerData;
     double operationCode;
     private ArrayList onlinePlayers;
@@ -146,6 +137,7 @@ public class ServerController {
                                     }
                             }
                             else if(code == Codes.LOGOUT_CODE ){
+
                                  
                                 if(currentPlayer!=null){
                                  
@@ -208,13 +200,18 @@ public class ServerController {
                                         requestData.clear();
                                         requestData.add(Codes.INVITATION_REPLY_CODE);
                                         requestData.add(isAccepted);
-                                        requestData.add(userName);
+                                        requestData.add(currentPlayer);
+                                        
                                         player.outputStream.println(gson.toJson(requestData));
                                         if(isAccepted==1.0){
+                                            
+                                            currentPlayer.setIsPlaying(true);  
+                                            NetworkAccessLayer.updateUserState(currentPlayer);
                                             enemyUserName = player_data.getUserName();
                                             player.enemyUserName = userName;
                                             currentPlayer.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(currentPlayer);
+
                                              
                                             player_data.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(player_data);
@@ -223,27 +220,14 @@ public class ServerController {
                                                 onboardStatisticController.updatePlayerStatusChart();
                                                 onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " has loged in game \n");
                                         });
+                                            sendMessageToAllPlayers();
                                         }
                                         System.out.println(isAccepted+"==========================================");
                                     }
                                 }
                                 
                             }
-                            else if(code == Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE)
-                            {
-                                 System.out.println("SERVER CONTROLLER EDITPROFILE: "+json);
-                                 String jsonPlayerData = (String)requestData.get(1);
-                                 System.out.println("Edit Data in Server: "+jsonPlayerData);
-                                 String dataDaseResult = myDatabase.selectInfoForEdidProfilePage(jsonPlayerData);
-                                 requestData.clear();
-                                 gson.toJson(dataDaseResult);
-                                 
-                                 //System.out.println("Player in Server Contoller : "+dataDaseResult.getName()+","+dataDaseResult.getUserName()+","+dataDaseResult.getScore());
-                                 requestData.add(Codes.SELECT_DATA_FOR_EDIT_PROFILE_CODE);
-                                 requestData.add(dataDaseResult);
-                                 System.out.println("Jeson Request Data: "+requestData.getClass());
-                                 outputStream.println(requestData);
-                            }
+                            
                             else if(code == Codes.SEND_PLAY_ON_BOARD_CODE)
                             {
                                 // System.out.println("Request fron EDITPROFILE in server: "+json);
@@ -306,6 +290,16 @@ public class ServerController {
                                     }
                                     }
                                 }
+                                
+                            }
+                            else if(code == Codes.DELETE_ACCOUNT_CODE)
+                            {
+                                int deleteResult = myDatabase.deleteAccount(requestData.get(1).toString());
+                                requestData.clear();
+                                requestData.add(Codes.DELETE_ACCOUNT_CODE);
+                                requestData.add(deleteResult);
+                                System.out.println("ServerController Delete"+requestData);
+                                outputStream.println(requestData);
                                 
                             }
                             else if(code == Codes.UPDATE_PLAYER_SCORE){

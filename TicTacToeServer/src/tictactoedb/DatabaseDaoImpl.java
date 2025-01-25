@@ -85,35 +85,7 @@ public class DatabaseDaoImpl implements DatabaseDao{
         }
         return result;
     }
-    
-    @Override
-  public String selectInfoForEdidProfilePage(String usename)
-    {
-        PlayerDto player = new PlayerDto();
-        String playerJson=null;
-        ResultSet selectResult;
-        try {
-            
-            System.out.println("DTO selectInfoForEdidProfilePage");
-          //  Connection con = getConnection();
-            statement = con.prepareStatement("SELECT USERNAME , NAME , SCORE FROM PLAYERS WHERE USERNAME = ?",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-            statement.setString(1, usename);
-            selectResult = statement.executeQuery();
-            selectResult.first();
-            System.out.println("SeclectForEdit :"+selectResult.getString("NAME"));
-            player.setUserName(selectResult.getString("USERNAME"));
-            player.setName(selectResult.getString("NAME"));
-            player.setScore(selectResult.getInt("SCORE"));
-            playerJson = gson.toJson(player);
-            System.out.println("jeson sent from DataDataBase: "+playerJson);
-            selectResult.close();
-//            pst.close();
-//            con.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return playerJson;
-    }
+
    public static boolean insert(PlayerDto player) throws SQLException {
         
          statement = con.prepareStatement("INSERT INTO PLAYERS (username, name, password, score, gender,is_online, is_playing) VALUES (?, ?, ?,?,?,?,?)");
@@ -178,6 +150,28 @@ public class DatabaseDaoImpl implements DatabaseDao{
             return playerResult;
 
     }
+
+    @Override
+    public int deleteAccount(String jsonPlayer) {
+        int excutionStatus = 0;
+        try {
+            PlayerDto player = gson.fromJson(jsonPlayer, PlayerDto.class);
+            PreparedStatement stmnt = con.prepareStatement("DELETE FROM PLAYERS WHERE USERNAME = ?");
+            stmnt.setString(1,player.getUserName() );
+            int result = stmnt.executeUpdate();
+            if(result>0)
+            {
+                excutionStatus=1;
+                playerResult = stmnt.executeQuery();
+            }
+            stmnt.close();
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseDaoImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return excutionStatus;
+    }
+    
         
     
 public static List<String> getAvailablePlayers() {
