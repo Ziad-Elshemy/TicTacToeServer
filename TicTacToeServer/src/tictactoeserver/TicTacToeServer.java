@@ -1,6 +1,9 @@
 package tictactoeserver;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,6 +12,7 @@ import javafx.stage.Stage;
 
 import tictactoedb.DatabaseDao;
 import tictactoedb.DatabaseDaoImpl;
+import tictactoedb.NetworkAccessLayer;
 import static tictactoeserver.ServerController.playersList;
 import utilities.Codes;
 
@@ -37,10 +41,21 @@ public class TicTacToeServer extends Application {
                 controller.server.stopServer();
             }
             for (ServerController player : playersList) {
-
                 ArrayList serverCloseRequest = new ArrayList();
                 serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
                 player.outputStream.println(serverCloseRequest);
+                player.currentPlayer.setIsOnline(false);
+                player.currentPlayer.setIsPlaying(false);
+                try {
+                    player.currentPlayer.setIsOnline(false);
+                    player.currentPlayer.setIsPlaying(false);
+                    NetworkAccessLayer.logout(player.currentPlayer);
+                    NetworkAccessLayer.updateUserState(player.currentPlayer);
+                   // playersList.remove(player);
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(OnboardStatisticController.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

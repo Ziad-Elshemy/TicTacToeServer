@@ -63,20 +63,26 @@ public class OnboardStatisticController implements Initializable {
                 start_button.setText("STOP");
                 start_button.setStyle("-fx-background-color: GREEN;");
                 appendTextToArea(received_data_area, "Server started successfully.\n");
-                 for(ServerController player : playersList)
-                    {
+                for (ServerController player : playersList) {
+                    ArrayList serverCloseRequest = new ArrayList();
+                    serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
+                    player.outputStream.println(serverCloseRequest);
+                    player.currentPlayer.setIsOnline(false);
+                    player.currentPlayer.setIsPlaying(false);
+                    try {
                         player.currentPlayer.setIsOnline(false);
                         player.currentPlayer.setIsPlaying(false);
-                       try {
-                           NetworkAccessLayer.updateUserState(player.currentPlayer);
-                       } catch (SQLException ex) {
-                           Logger.getLogger(OnboardStatisticController.class.getName()).log(Level.SEVERE, null, ex);
-                       }
+                        NetworkAccessLayer.logout(player.currentPlayer);
+                        NetworkAccessLayer.updateUserState(player.currentPlayer);
+                      //  playersList.remove(player);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(OnboardStatisticController.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }
 
-                    updateAvailablePlayers(); // Update available players on startup
-                    updateTopPlayers(); // Update top players on startup
-                    updatePlayerStatusChart();
+                updateAvailablePlayers(); // Update available players on startup
+                updateTopPlayers(); // Update top players on startup
+                updatePlayerStatusChart();
             } else {
                 server.stopServer();
                 isStarted = false;
@@ -86,6 +92,18 @@ public class OnboardStatisticController implements Initializable {
                     ArrayList serverCloseRequest = new ArrayList();
                     serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
                     player.outputStream.println(serverCloseRequest);
+                    player.currentPlayer.setIsOnline(false);
+                    player.currentPlayer.setIsPlaying(false);
+                    try {
+                        player.currentPlayer.setIsOnline(false);
+                        player.currentPlayer.setIsPlaying(false);
+                        NetworkAccessLayer.logout(player.currentPlayer);
+                        NetworkAccessLayer.updateUserState(player.currentPlayer);
+                       // playersList.remove(player);
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(OnboardStatisticController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 appendTextToArea(received_data_area, "Server stopped successfully.\n");
             }
@@ -93,7 +111,9 @@ public class OnboardStatisticController implements Initializable {
             e.printStackTrace();
             appendTextToArea(received_data_area, "Error: " + e.getMessage() + "\n");
         }
-    }    /**
+    }
+
+    /**
      * Appends the given text to the specified TextArea.
      *
      * @param textArea The TextArea to append text to.
@@ -106,81 +126,81 @@ public class OnboardStatisticController implements Initializable {
     /**
      * Updates the player status chart with online, offline, and in-game counts.
      */
-   public void updatePlayerStatusChart() {
-    try {
-        int[] counts = DatabaseDaoImpl.getPlayerStatusCounts();
-        int online = counts[0];
-        int offline = counts[1];
-        int inGame = counts[2];
+    public void updatePlayerStatusChart() {
+        try {
+            int[] counts = DatabaseDaoImpl.getPlayerStatusCounts();
+            int online = counts[0];
+            int offline = counts[1];
+            int inGame = counts[2];
 
-        Platform.runLater(() -> {
-            player_status_chart.getData().clear();
+            Platform.runLater(() -> {
+                player_status_chart.getData().clear();
 
-            int total = online + offline + inGame;
-            if (total == 0) {
-                total = 1; // Avoid division by zero
-            }
+                int total = online + offline + inGame;
+                if (total == 0) {
+                    total = 1; // Avoid division by zero
+                }
 
-            double onlinePercentage = (online / (double) total) * 100;
-            double offlinePercentage = (offline / (double) total) * 100;
-            double inGamePercentage = (inGame / (double) total) * 100;
+                double onlinePercentage = (online / (double) total) * 100;
+                double offlinePercentage = (offline / (double) total) * 100;
+                double inGamePercentage = (inGame / (double) total) * 100;
 
-            PieChart.Data onlineData = new PieChart.Data(
-                    String.format("Online%.1f%%", onlinePercentage), online);
-            PieChart.Data offlineData = new PieChart.Data(
-                    String.format("Offline%.1f%%", offlinePercentage), offline);
-            PieChart.Data inGameData = new PieChart.Data(
-                    String.format("InGame%.1f%%", inGamePercentage), inGame);
+                PieChart.Data onlineData = new PieChart.Data(
+                        String.format("Online%.1f%%", onlinePercentage), online);
+                PieChart.Data offlineData = new PieChart.Data(
+                        String.format("Offline%.1f%%", offlinePercentage), offline);
+                PieChart.Data inGameData = new PieChart.Data(
+                        String.format("InGame%.1f%%", inGamePercentage), inGame);
 
-            player_status_chart.setData(FXCollections.observableArrayList(onlineData, offlineData, inGameData));
-        });
-    } catch (Exception e) {
-        Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching player status: " + e.getMessage() + "\n"));
+                player_status_chart.setData(FXCollections.observableArrayList(onlineData, offlineData, inGameData));
+            });
+        } catch (Exception e) {
+            Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching player status: " + e.getMessage() + "\n"));
+        }
     }
-}
 
     /**
      * Updates the available players list in the TextArea.
      */
-public void updateTopPlayers() {
-    try {
-        List<String> topPlayers = DatabaseDaoImpl.getTopPlayers();
-        Platform.runLater(() -> {
-            if (topPlayers.isEmpty()) {
-                top_players_area.setText("No top players found.");
-            } else {
-                StringBuilder topPlayersList = new StringBuilder();
-                for (String player : topPlayers) {
-                    topPlayersList.append(player).append("\n");
+    public void updateTopPlayers() {
+        try {
+            List<String> topPlayers = DatabaseDaoImpl.getTopPlayers();
+            Platform.runLater(() -> {
+                if (topPlayers.isEmpty()) {
+                    top_players_area.setText("No top players found.");
+                } else {
+                    StringBuilder topPlayersList = new StringBuilder();
+                    for (String player : topPlayers) {
+                        topPlayersList.append(player).append("\n");
+                    }
+                    top_players_area.setText(topPlayersList.toString());
                 }
-                top_players_area.setText(topPlayersList.toString());
-            }
-        });
-    } catch (Exception e) {
-        Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching top players: " + e.getMessage() + "\n"));
+            });
+        } catch (Exception e) {
+            Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching top players: " + e.getMessage() + "\n"));
+        }
     }
-}
 
-public void updateAvailablePlayers() {
-    try {
-        List<String> availablePlayers = DatabaseDaoImpl.getAvailablePlayers();
-        Platform.runLater(() -> {
-            if (availablePlayers.isEmpty()) {
-                available_players_area.setText("No players available.");
-            } else {
-                StringBuilder playersList = new StringBuilder();
-                for (String player : availablePlayers) {
-                    playersList.append(player).append("\n");
+    public void updateAvailablePlayers() {
+        try {
+            List<String> availablePlayers = DatabaseDaoImpl.getAvailablePlayers();
+            Platform.runLater(() -> {
+                if (availablePlayers.isEmpty()) {
+                    available_players_area.setText("No players available.");
+                } else {
+                    StringBuilder playersList = new StringBuilder();
+                    for (String player : availablePlayers) {
+                        playersList.append(player).append("\n");
+                    }
+                    available_players_area.setText(playersList.toString());
                 }
-                available_players_area.setText(playersList.toString());
-            }
-        });
-    } catch (Exception e) {
-        Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching available players: " + e.getMessage() + "\n"));
+            });
+        } catch (Exception e) {
+            Platform.runLater(() -> appendTextToArea(received_data_area, "Error fetching available players: " + e.getMessage() + "\n"));
+        }
     }
-}
 
-public TextArea getReceivedDataArea() {
-    return received_data_area;
-}
+    public TextArea getReceivedDataArea() {
+        return received_data_area;
+    }
 }
