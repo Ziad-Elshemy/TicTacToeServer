@@ -380,7 +380,7 @@ public class ServerController {
                                                 onboardStatisticController.updateAvailablePlayers();
                                                 onboardStatisticController.updatePlayerStatusChart();
                                                 onboardStatisticController.updateTopPlayers();
-                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " upfate in score \n");
+                                                onboardStatisticController.appendTextToArea(receivedDataArea, "Player " + currentPlayer.getUserName() + " update in score \n");
                                             });
                                          }
                                         }
