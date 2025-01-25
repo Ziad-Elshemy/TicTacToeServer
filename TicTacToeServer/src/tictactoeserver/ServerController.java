@@ -47,6 +47,7 @@ public class ServerController {
     double code ;
     
     
+    
     public ServerController(Socket socket){
         try {
             playerSocket = socket;
@@ -173,9 +174,11 @@ public class ServerController {
                                         requestData.clear();
                                         requestData.add(Codes.INVITATION_REPLY_CODE);
                                         requestData.add(isAccepted);
-                                        requestData.add(userName);
+                                        requestData.add(currentPlayer);
+                                        
                                         player.outputStream.println(gson.toJson(requestData));
                                         if(isAccepted==1.0){
+                                            
                                             
                                              currentPlayer.setIsPlaying(true);  
                                              NetworkAccessLayer.updateUserState(currentPlayer);
