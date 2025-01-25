@@ -8,12 +8,15 @@ public interface Codes {
     public  int LOGOUT_CODE = 2;
     public  int CHANGE_PASSWORD_CODE = 3;
     public static int SELECT_DATA_FOR_EDIT_PROFILE_CODE = 4;
+    public static int SEND_PLAY_ON_BOARD_CODE = 5;
+    public static int UPDATE_PLAYER_SCORE = 6;
     public static int SEND_INVITATION_CODE = 7;
     public static int INVITATION_REPLY_CODE = 8;
-    
+    public static int PLAY_AGAIN_CODE = 9;
     public static int GET_ONLINE_PLAYERS = 11;
     public static int GET_PLAYING_PLAYERS = 12;
+    public static int LEAVE_GAME_CODE = 13;
+    public static int DELETE_ACCOUNT_CODE = 14;
     public static int SERVER_CLOSE_CODE = 16;
-
 
 }
