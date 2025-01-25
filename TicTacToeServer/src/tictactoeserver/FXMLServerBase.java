@@ -1,9 +1,16 @@
 package tictactoeserver;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
+import tictactoedb.NetworkAccessLayer;
+import static tictactoeserver.ServerController.playersList;
+import utilities.Codes;
 
 public class FXMLServerBase extends AnchorPane {
 
@@ -44,6 +51,16 @@ public class FXMLServerBase extends AnchorPane {
             isStarted = true;
             startBtn.setText("STOP");
             startBtn.setStyle("-fx-background-color: RED;");
+             for(ServerController player : playersList)
+             {
+                 player.currentPlayer.setIsOnline(false);
+                 player.currentPlayer.setIsPlaying(false);
+                try {
+                    NetworkAccessLayer.updateUserState(player.currentPlayer);
+                } catch (SQLException ex) {
+                    Logger.getLogger(FXMLServerBase.class.getName()).log(Level.SEVERE, null, ex);
+                }
+             }
         
         //stop the server    
         }else{
@@ -51,6 +68,12 @@ public class FXMLServerBase extends AnchorPane {
             isStarted = false;
             startBtn.setText("START");
             startBtn.setStyle("-fx-background-color: GREEN;");
+            for(ServerController player : playersList)
+             {
+                ArrayList serverCloseRequest = new ArrayList();
+                serverCloseRequest.add(Codes.SERVER_CLOSE_CODE);
+                player.outputStream.println(serverCloseRequest);
+            }
         }
     }
 

@@ -20,7 +20,7 @@ import utilities.Codes;
 public class ServerController {
     
     private DataInputStream dataInputStream;
-    private PrintStream outputStream;
+    public PrintStream outputStream;
     Socket playerSocket;
     static Vector<ServerController> playersList = new Vector<>();
     static int i =1;
@@ -32,7 +32,7 @@ public class ServerController {
     Gson gson = new Gson();
     DatabaseDao myDatabase = new DatabaseDaoImpl();
     private PlayerDto databaseResult;
-    private PlayerDto currentPlayer;
+    public PlayerDto currentPlayer;
     private String jsonPlayerData;
     double operationCode;
     private ArrayList onlinePlayers;
@@ -111,8 +111,10 @@ public class ServerController {
                                  requestData.add(Codes.CHANGE_PASSWORD_CODE);
                                  requestData.add(dataDaseResult);
                                  outputStream.println(requestData);
+
                             }
                             else if(code == Codes.LOGOUT_CODE ){
+
                                  
                                 if(currentPlayer!=null){
                                  
