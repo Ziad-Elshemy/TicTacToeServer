@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tictactoeserver;
 
 import com.google.gson.Gson;
@@ -17,15 +12,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tictactoedb.NetworkAccessLayer;
 import tictactoedb.DatabaseDao;
-import tictactoedb.PlayerDto;
 import tictactoedb.DatabaseDaoImpl;
 import tictactoedb.PlayerDto;
 import utilities.Codes;
 
-/**
- *
- * @author Ziad-Elshemy
- */
+
 public class ServerController {
     
     private DataInputStream dataInputStream;
@@ -46,6 +37,7 @@ public class ServerController {
     double operationCode;
     private ArrayList onlinePlayers;
     double code ;
+    
     
     
     public ServerController(Socket socket){
@@ -133,6 +125,7 @@ public class ServerController {
                                     currentPlayer.setIsPlaying(false);
                                     NetworkAccessLayer.updateUserState(currentPlayer);
                                     sendMessageToAllPlayers();
+                                   // currentPlayer=null;
                                 }
                             }
                             else if(code == Codes.SEND_INVITATION_CODE)
@@ -176,13 +169,18 @@ public class ServerController {
                                         requestData.clear();
                                         requestData.add(Codes.INVITATION_REPLY_CODE);
                                         requestData.add(isAccepted);
-                                        requestData.add(userName);
+                                        requestData.add(currentPlayer);
+                                        
                                         player.outputStream.println(gson.toJson(requestData));
                                         if(isAccepted==1.0){
+                                            
+                                            currentPlayer.setIsPlaying(true);  
+                                            NetworkAccessLayer.updateUserState(currentPlayer);
                                             enemyUserName = player_data.getUserName();
                                             player.enemyUserName = userName;
                                             currentPlayer.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(currentPlayer);
+
                                              
                                             player_data.setIsPlaying(true);  
                                             NetworkAccessLayer.updateUserState(player_data);
