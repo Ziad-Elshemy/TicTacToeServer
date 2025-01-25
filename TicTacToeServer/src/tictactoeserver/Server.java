@@ -19,11 +19,12 @@ import tictactoedb.DatabaseDao;
 public class Server extends Thread {
     ServerSocket serverSocket;
     ServerController serverController;
+    private OnboardStatisticController onboardStatisticController;
     //DatabaseDao myDatabase = new DatabaseDao();
     static int counter = 0;
     
-    public Server(){
-    
+    public Server(OnboardStatisticController onboardStatisticController){
+            this.onboardStatisticController = onboardStatisticController;
         try {
             serverSocket = new ServerSocket(5005);
             start();
@@ -52,7 +53,7 @@ public class Server extends Thread {
             try {
                 Socket playerSocket;
                 playerSocket = serverSocket.accept();
-                serverController = new ServerController(playerSocket);
+                serverController = new ServerController(playerSocket , onboardStatisticController, onboardStatisticController.getReceivedDataArea() );
                 System.out.println("new player added");
                 
                 /*
