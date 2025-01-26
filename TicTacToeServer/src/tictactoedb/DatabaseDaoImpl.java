@@ -35,6 +35,7 @@ public class DatabaseDaoImpl implements DatabaseDao{
         try {
             DriverManager.registerDriver(new ClientDriver());
             con= DriverManager.getConnection("jdbc:derby://localhost:1527/tictactoe_db","root","root");
+            con.setAutoCommit(false);
             result=selectAll();
         } catch (SQLException ex) {
             Logger.getLogger(DatabaseDao.class.getName()).log(Level.SEVERE, null, ex);
