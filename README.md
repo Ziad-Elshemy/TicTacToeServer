@@ -1,4 +1,4 @@
-# ✖️⭕✖️ Tic Tac Toe Game Server
+# ✖️⭕✖️ TicTacToeGame Server
 
 ## Project Description
 The Tic Tac Toe Game Server is a Java-based application that manages the backend for the Tic Tac Toe multiplayer game. The server handles player connections, manages game states, and provides a real-time dashboard for monitoring player activities.
