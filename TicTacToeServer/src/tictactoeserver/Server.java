@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tictactoeserver;
 
 import java.io.IOException;
@@ -10,20 +5,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tictactoedb.DatabaseDao;
 
-/**
- *
- * @author Ziad-Elshemy
- */
 public class Server extends Thread {
     ServerSocket serverSocket;
     ServerController serverController;
+    private OnboardStatisticController onboardStatisticController;
     //DatabaseDao myDatabase = new DatabaseDao();
     static int counter = 0;
     
-    public Server(){
-    
+    public Server(OnboardStatisticController onboardStatisticController){
+            this.onboardStatisticController = onboardStatisticController;
         try {
             serverSocket = new ServerSocket(5005);
             start();
@@ -52,7 +43,7 @@ public class Server extends Thread {
             try {
                 Socket playerSocket;
                 playerSocket = serverSocket.accept();
-                serverController = new ServerController(playerSocket);
+                serverController = new ServerController(playerSocket , onboardStatisticController, onboardStatisticController.getReceivedDataArea() );
                 System.out.println("new player added");
                 
                 /*
